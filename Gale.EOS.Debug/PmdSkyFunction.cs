@@ -4,13 +4,13 @@ public sealed class PmdSkyFunction
 {
     public string Name { get; }
     public string[] Aliases { get; }
-    public Dictionary<string, long> Address { get; }
+    public Dictionary<string, long[]> Address { get; }
     public string Description { get; }
 
     internal PmdSkyFunction(
         string name,
         string[] aliases,
-        Dictionary<string, long> address,
+        Dictionary<string, long[]> address,
         string description
     )
     {

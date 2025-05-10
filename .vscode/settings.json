@@ -10,7 +10,8 @@
         "kecleon",
         "mappa",
         "ppmdu",
-        "tileset"
+        "tileset",
+        "Yamls"
     ],
     "cSpell.enabledFileTypes": {
         "*": false,

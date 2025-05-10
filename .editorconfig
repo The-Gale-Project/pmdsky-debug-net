@@ -3,7 +3,6 @@ root = true
 [*.{cs,vb}]
 
 insert_final_newline = true
-csharp_new_line_before_else = false
 
 # IDE0003: Remove qualification
 dotnet_style_qualification_for_event = true
@@ -33,3 +32,7 @@ dotnet_diagnostic.IDE0130.severity = error
 
 # CA1859: Use concrete types when possible for improved performance
 dotnet_diagnostic.CA1859.severity = error
+
+# SYSLIB1045: Convert to 'GeneratedRegexAttribute'.
+# Remarks: This is not supported in netstandard2.0.
+dotnet_diagnostic.SYSLIB1045.severity = none

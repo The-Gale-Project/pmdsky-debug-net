@@ -29,6 +29,12 @@ public sealed class PmdSkySymbol
     public string Description { get; }
 
     /// <summary>
+    /// Nested symbol descriptors contained within this parent symbol
+    /// organized by version defined by <see cref="Versions"/>.
+    /// </summary>
+    public Dictionary<string, PmdSkySymbol> SubRegions { get; }
+
+    /// <summary>
     /// Array of the functions within this symbol.
     /// </summary>
     public PmdSkyFunction[] Functions { get; }
@@ -43,6 +49,7 @@ public sealed class PmdSkySymbol
         Dictionary<string, long> address,
         Dictionary<string, long> length,
         string description,
+        Dictionary<string, PmdSkySymbol> subRegions,
         PmdSkyFunction[] functions,
         PmdSkyData[] data
     )
@@ -51,6 +58,7 @@ public sealed class PmdSkySymbol
         this.Address = address;
         this.Length = length;
         this.Description = description;
+        this.SubRegions = subRegions;
         this.Functions = functions;
         this.Data = data;
     }
