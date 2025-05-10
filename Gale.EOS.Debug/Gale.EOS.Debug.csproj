@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Nuget Properties -->
+    <PackageId>Gale.EOS.Debug</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>DeltaJordan</Authors>
+    <Title>pmdsky_debug Loose C# Bindings</Title>
+    <Description>Very rudimentary bindings for pmdsky-debug.</Description>
+    <Copyright>Copyright © Jordan Marine 2025</Copyright>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/The-Gale-Project/pmdsky-debug-net</PackageProjectUrl>
+    <PackageTags>pmd;pmdsky-debug;pmdsky-debug-net</PackageTags>
+    <RepositoryUrl>https://github.com/The-Gale-Project/pmdsky-debug-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>main</RepositoryBranch>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="_pmdsky-debug\symbols\**\*.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+</Project>
