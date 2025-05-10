@@ -7,6 +7,9 @@ using YamlDotNet.Serialization;
 
 namespace Gale.EOS.Debug;
 
+/// <summary>
+/// Mapping of pmdsky_debug data to C#-readable stores.
+/// </summary>
 public sealed class PmdSkySymbolMap
 {
     private static readonly Regex RootSymbolYamlRegex = new(

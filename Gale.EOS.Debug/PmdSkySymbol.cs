@@ -14,12 +14,12 @@ public sealed class PmdSkySymbol
     public string[] Versions { get; }
 
     /// <summary>
-    /// Dictionary of all the addresses organized by versions defined by <see cref="Versions"/>
+    /// Dictionary of all the addresses organized by versions defined by <see cref="Versions"/>.
     /// </summary>
     public Dictionary<string, long> Address { get; }
 
     /// <summary>
-    /// The length of this symbol, in bytes, organized by version defined by <see cref="Versions"/> .
+    /// The length of this symbol, in bytes, organized by version defined by <see cref="Versions"/>.
     /// </summary>
     public Dictionary<string, long> Length { get; }
 
