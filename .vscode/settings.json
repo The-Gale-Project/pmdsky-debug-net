@@ -13,8 +13,5 @@
         "tileset",
         "Yamls"
     ],
-    "cSpell.enabledFileTypes": {
-        "*": false,
-        "csharp": true
-    }
+    "cSpell.enabled": false
 }
