@@ -174,6 +174,7 @@ class DataParser:
             data_name = data["name"].lower().replace("__", "_")
 
             if isinstance(data["address"][self.version], list):
+                # TODO(DeltaJordan): Figure out how to handle address lists.
                 pass
             else:
                 if ("length" not in data or self.version not in data["length"]) and data_name not in self.type_map:

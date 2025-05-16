@@ -24,6 +24,7 @@ def process_functions(function_list: list[dict], base_address: int, version_id: 
         function_name = to_snake_case(function["name"]).strip("_")
 
         if isinstance(function["address"][version_id], list):
+            # TODO(DeltaJordan): Figure out how to handle address lists.
             pass
         else:
             result_dict[function_name] = {
@@ -107,7 +108,7 @@ def process_binary_version(root_dict: dict, binary_name: str, version: str) -> d
             f.flush()
 
     if "subregions" in root_dict[binary_name]:
-        # TODO: We should add this last.
+        # TODO(DeltaJordan): Figure out how to handle subregions.
         pass
 
     mapping_folder = Path("src", version)
