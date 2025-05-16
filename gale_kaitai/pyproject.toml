@@ -1,0 +1,17 @@
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # Exclude docstring stuff (D100 - D107).
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "T201", # Allow print statements.
+]

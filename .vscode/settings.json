@@ -5,6 +5,17 @@
             120 // Recommended line length for *.cs files.
         ]
     },
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.rulers": [
+            120 // Recommended line length for *.py files.
+        ]
+    },
     "cSpell.words": [
         "bitflags",
         "kecleon",
@@ -13,5 +24,7 @@
         "tileset",
         "Yamls"
     ],
-    "cSpell.enabled": false
+    "cSpell.enabled": false,
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.autoImportCompletions": true
 }
