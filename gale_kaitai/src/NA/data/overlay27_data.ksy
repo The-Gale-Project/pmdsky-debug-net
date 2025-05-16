@@ -74,10 +74,5 @@ instances:
     pos: 0x2d44
     doc: "Note: unverified, ported from Irdkwia's notes"
     size: 0x4
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
+types: {}
 enums: {}

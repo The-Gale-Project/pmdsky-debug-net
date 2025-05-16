@@ -11,10 +11,5 @@ instances:
   evo_main_menu_items:
     pos: 0x2c20
     size: 0x20
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
+types: {}
 enums: {}

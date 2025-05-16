@@ -71,10 +71,5 @@ instances:
   main_debug_menu_items_2:
     pos: 0x12370
     size: 0x38
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
+types: {}
 enums: {}

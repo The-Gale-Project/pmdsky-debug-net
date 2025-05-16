@@ -14,10 +14,5 @@ instances:
   discard_items_main_menu_items:
     pos: 0x28a4
     size: 0x28
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
+types: {}
 enums: {}

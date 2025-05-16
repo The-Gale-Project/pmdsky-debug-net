@@ -26,10 +26,5 @@ instances:
     pos: 0x292c
     doc: "Note: unverified, ported from Irdkwia's notes"
     size: 0x10
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
+types: {}
 enums: {}

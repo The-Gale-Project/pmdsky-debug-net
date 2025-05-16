@@ -38,10 +38,5 @@ instances:
     type: u4
     repeat: expr
     repeat-expr: 42
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
+types: {}
 enums: {}

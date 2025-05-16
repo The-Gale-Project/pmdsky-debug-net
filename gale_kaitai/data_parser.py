@@ -53,84 +53,120 @@ class DataParser:
         self.binary_name = binary_name
         self.base_address = base_address
         self.version = version
-        self.types = {}
+        self.type_map = {}
         self.array_types = {}
+        self.used_structs = {}
+        self.used_enums = {}
+        self._build_type_map()
 
-    def build_type_map(self) -> dict:
-        result_dict = {}
-        for header_path in Path(DATA_HEADER_DIR).rglob("*.h"):
-            with header_path.open("r") as f:
-                for line in f:
-                    # Ignore comments.
-                    line = re.sub(r"[\s]*//.+", "", line)  # noqa: PLW2901
+    def _parse_struct(self, struct_name: str, data_name: str) -> None:
+        if struct_name in KSY_STRUCT_MAP:
+            self.type_map[data_name] = struct_name
+            self.used_structs[struct_name] = KSY_STRUCT_MAP[struct_name]
+        elif struct_name.endswith("*"):
+            # This is a pointer.
+            self.type_map[data_name] = "u4"
+        else:
+            print(
+                f"[WARNING][build_type_map][{self.binary_name}]: Failed to find struct mapping",
+                struct_name,
+                "for",
+                data_name,
+            )
 
-                    if not line.startswith("extern"):
-                        continue
+    def _parse_enum(self, enum_name: str, data_name: str) -> None:
+        if enum_name in KSY_ENUM_MAP:
+            self.type_map[data_name] = enum_name
+            self.used_enums[enum_name] = KSY_ENUM_MAP[enum_name]
+        elif enum_name.endswith("*"):
+            # This is a pointer.
+            self.type_map[enum_name] = "u4"
+        else:
+            print(
+                f"[WARNING][build_type_map][{self.binary_name}]: Failed to find enum mapping",
+                enum_name,
+                "for",
+                data_name,
+            )
 
-                    identifiers = line.split(" ")
-                    line_primitive = identifiers[1]
-                    line_type_name_search = re.search(r"[_A-Z0-9]+", identifiers[-1])
-                    if not line_type_name_search:
-                        print(f"[WARNING][build_type_map][{header_path}]: Invalid line:\n", line)
-                        continue
+    def _parse_header(self, header_path: Path) -> None:
+        with header_path.open("r") as f:
+            for line in f:
+                # Ignore comments.
+                line = re.sub(r"[\s]*//.+", "", line)  # noqa: PLW2901
 
-                    line_type_name = line_type_name_search.group().lower().replace("__", "_")
+                if not line.startswith("extern"):
+                    continue
 
-                    line_array_length_search = re.search(r"\[([0-9]+)\]", identifiers[-1])
-                    if line_array_length_search:
-                        if line_type_name in self.array_types:
-                            print(f"[ERROR][build_type_map][{header_path}]:", line_type_name, "is already defined.")
-                            raise ValueError
-                        self.array_types[line_type_name] = int(line_array_length_search.group(1))
+                identifiers = line.split(" ")
+                line_primitive = identifiers[1]
+                data_name_search = re.search(r"[_A-Z0-9]+", identifiers[-1])
+                if not data_name_search:
+                    print(f"[WARNING][build_type_map][{header_path}]: Invalid line:\n", line)
+                    continue
 
-                    if line_primitive == "struct":
-                        line_struct = identifiers[2]
-                        if line_struct in KSY_STRUCT_MAP:
-                            result_dict[line_type_name] = line_struct
-                        elif line_struct.endswith("*"):
-                            # This is a pointer.
-                            result_dict[line_type_name] = "u4"
-                        else:
-                            print(
-                                f"[WARNING][build_type_map][{header_path}]: Failed to find struct mapping",
-                                line_struct,
-                                "for",
-                                line_type_name,
-                            )
-                    elif line_primitive == "enum":
-                        line_enum = identifiers[2]
-                        if line_enum in KSY_ENUM_MAP:
-                            result_dict[line_type_name] = line_enum
-                        else:
-                            print(
-                                f"[WARNING][build_type_map][{header_path}]: Failed to find enum mapping",
-                                line_enum,
-                                "for",
-                                line_type_name,
-                            )
-                    elif line_primitive in KSY_TYPE_MAP:
-                        result_dict[line_type_name] = KSY_TYPE_MAP[line_primitive]
-                    elif line_primitive.endswith("*"):
-                        # This is a pointer.
-                        result_dict[line_type_name] = "u4"
-                    else:
-                        # Ensure we don't store this.
-                        result_dict.pop(line_type_name, None)
-                        print(
-                            f"[WARNING][build_type_map][{header_path}]: Failed to map type",
-                            line_primitive,
-                            "for",
-                            line_type_name,
-                        )
+                data_name = data_name_search.group().lower().replace("__", "_")
 
-        return result_dict
+                line_array_length_search = re.search(r"\[([0-9]+)\]", identifiers[-1])
+                if line_array_length_search:
+                    if data_name in self.array_types:
+                        print(f"[ERROR][build_type_map][{header_path}]:", data_name, "is already defined.")
+                        raise ValueError
+                    self.array_types[data_name] = int(line_array_length_search.group(1))
+
+                if line_primitive == "struct":
+                    self._parse_struct(identifiers[2], data_name)
+                elif line_primitive == "enum":
+                    self._parse_enum(identifiers[2], data_name)
+                elif line_primitive in KSY_TYPE_MAP:
+                    self.type_map[data_name] = KSY_TYPE_MAP[line_primitive]
+                elif line_primitive.endswith("*"):
+                    # This is a pointer.
+                    self.type_map[data_name] = "u4"
+                else:
+                    self.type_map.pop(data_name, None)
+                    print(
+                        f"[WARNING][build_type_map][{header_path}]: Failed to map type",
+                        line_primitive,
+                        "for",
+                        data_name,
+                    )
+
+    def _build_type_map(self) -> None:
+        header_file_name = f"{self.binary_name}.h"
+        if self.binary_name == "overlay1":
+            header_file_name = "overlay01.h"
+        elif self.binary_name == "overlay9":
+            header_file_name = "overlay09.h"
+        header_path = Path(DATA_HEADER_DIR, header_file_name)
+        if not header_path.exists():
+            if self.binary_name in ["overlay26", "overlay30"]:
+                # At the time of writing, these overlays do not have a header file.
+                return
+            print(f"[ERROR][build_type_map][{self.binary_name}]: Failed to read header file, does not exist.")
+            raise ValueError
+        self._parse_header(header_path)
+
+        if self.binary_name == "arm9":
+            itcm_path = Path(DATA_HEADER_DIR, "arm9", "itcm.h")
+            if not itcm_path.exists():
+                print("[ERROR][build_type_map][itcm]: Failed to read header file, does not exist.")
+                raise ValueError
+
+            self._parse_header(itcm_path)
+        elif self.binary_name == "overlay29":
+            move_effects_path = Path(DATA_HEADER_DIR, "overlay29", "move_effects.h")
+            if not move_effects_path.exists():
+                print("[ERROR][build_type_map][move_effects]: Failed to read header file, does not exist.")
+                raise ValueError
+
+            self._parse_header(move_effects_path)
 
     def process_data(
         self,
         data_list: list[dict],
-        type_map: dict,
     ) -> dict:
-        result_dict = {}
+        data_entries = {}
         for data in data_list:
             if "address" not in data or self.version not in data["address"]:
                 continue
@@ -140,7 +176,7 @@ class DataParser:
             if isinstance(data["address"][self.version], list):
                 pass
             else:
-                if ("length" not in data or self.version not in data["length"]) and data_name not in type_map:
+                if ("length" not in data or self.version not in data["length"]) and data_name not in self.type_map:
                     print(
                         f"[WARNING][{self.version}]: Type mapping is required for",
                         data_name,
@@ -148,15 +184,15 @@ class DataParser:
                     )
                     continue
 
-                result_dict[data_name] = {
+                data_entries[data_name] = {
                     "pos": HexInt(data["address"][self.version] - self.base_address),
                 }
 
                 if "description" in data:
-                    result_dict[data_name]["doc"] = data["description"]
+                    data_entries[data_name]["doc"] = data["description"]
 
-                if data_name in type_map:
-                    result_dict[data_name]["type"] = type_map[data_name]
+                if data_name in self.type_map:
+                    data_entries[data_name]["type"] = self.type_map[data_name]
 
                     if data_name in self.array_types:
                         if self.array_types[data_name] == 0:
@@ -167,23 +203,31 @@ class DataParser:
                                     "due to it being a variable length array,",
                                     "but there is not a length associated with it.",
                                 )
-                                result_dict.pop(data_name, None)
+                                data_entries.pop(data_name, None)
                                 continue
-                            result_dict[data_name]["size"] = HexInt(data["length"][self.version])
-                            result_dict[data_name]["type"] = f"{data_name}_entries"
-                            self.types[f"{data_name}_entries"] = {
+                            data_entries[data_name]["size"] = HexInt(data["length"][self.version])
+                            data_entries[data_name]["type"] = f"{data_name}_entries"
+                            self.used_structs[f"{data_name}_entries"] = {
                                 "seq": [
                                     {
                                         "id": "entries",
-                                        "type": type_map[data_name],
+                                        "type": self.type_map[data_name],
                                         "repeat": "eos",
                                     },
                                 ],
                             }
                         else:
-                            result_dict[data_name]["repeat"] = "expr"
-                            result_dict[data_name]["repeat-expr"] = self.array_types[data_name]
+                            data_entries[data_name]["repeat"] = "expr"
+                            data_entries[data_name]["repeat-expr"] = self.array_types[data_name]
                 else:
-                    result_dict[data_name]["size"] = HexInt(data["length"][self.version])
+                    data_entries[data_name]["size"] = HexInt(data["length"][self.version])
 
-        return result_dict
+        return {
+            "meta": {
+                "id": f"{self.binary_name}_data",
+                "endian": "le",
+            },
+            "instances": data_entries,
+            "types": self.used_structs,
+            "enums": self.used_enums,
+        }

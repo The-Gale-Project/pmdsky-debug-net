@@ -97,25 +97,5 @@ instances:
     pos: 0x48a64
     doc: The current world map
     type: u4
-types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
-  script_op_code_names_entries:
-    seq:
-    - id: entries
-      type: s1
-      repeat: eos
-  overlay11_debug_strings_entries:
-    seq:
-    - id: entries
-      type: s1
-      repeat: eos
-  c_routine_names_entries:
-    seq:
-    - id: entries
-      type: s1
-      repeat: eos
+types: {}
 enums: {}

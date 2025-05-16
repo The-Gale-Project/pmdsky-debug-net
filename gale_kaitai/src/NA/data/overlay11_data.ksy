@@ -153,11 +153,6 @@ instances:
     doc: The current world map
     type: u4
 types:
-  cart_removed_img_data_entries:
-    seq:
-    - id: entries
-      type: u1
-      repeat: eos
   script_op_code_names_entries:
     seq:
     - id: entries

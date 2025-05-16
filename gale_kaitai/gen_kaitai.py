@@ -4,6 +4,8 @@ from pathlib import Path
 import ruamel.yaml
 from ruamel.yaml.scalarint import HexInt
 
+from data_parser import DataParser
+
 SYMBOL_DIR = "_pmdsky-debug/symbols"
 
 
@@ -34,18 +36,18 @@ def process_functions(function_list: list[dict], base_address: int, version_id: 
     return result_dict
 
 
-def process_binary_version(root_dict: dict, binary_name: str, version_id: str, type_map: dict) -> dict:
+def process_binary_version(root_dict: dict, binary_name: str, version: str) -> dict:
     result_dict = {}
 
     # Get base address
-    if "address" in root_dict[binary_name] and version_id in root_dict[binary_name]["address"]:
-        base_address: int = root_dict[binary_name]["address"][version_id]
+    if "address" in root_dict[binary_name] and version in root_dict[binary_name]["address"]:
+        base_address: int = root_dict[binary_name]["address"][version]
     else:
         print(
-            f"[ERROR][{binary_name}][{version_id}]: Could not find base address for binary",
+            f"[ERROR][{binary_name}][{version}]: Could not find base address for binary",
             binary_name,
             "using version",
-            version_id,
+            version,
         )
         raise ValueError
 
@@ -56,7 +58,7 @@ def process_binary_version(root_dict: dict, binary_name: str, version_id: str, t
     # Build metadata
     result_dict["meta"] = {
         "id": binary_name,
-        "tags": version_id,
+        "tags": version,
         "endian": "le",
         "imports": ["../common/types"],
     }
@@ -82,10 +84,10 @@ def process_binary_version(root_dict: dict, binary_name: str, version_id: str, t
         function_map["instances"] = process_functions(
             root_dict[binary_name]["functions"],
             base_address,
-            version_id,
+            version,
         )
 
-        function_folder = Path("src", f"{version_id}", "functions")
+        function_folder = Path("src", f"{version}", "functions")
         function_folder.mkdir(parents=True, exist_ok=True)
         with Path(function_folder, f"{function_map_type_name}.ksy").open("w") as f:
             yaml.dump(function_map, f)
@@ -97,22 +99,8 @@ def process_binary_version(root_dict: dict, binary_name: str, version_id: str, t
         result_dict["instances"]["data"] = {}
         result_dict["instances"]["data"]["type"] = data_map_type_name
 
-        data_map = {}
-        data_map["meta"] = {
-            "id": data_map_type_name,
-            "endian": "le",
-        }
-        data_map["instances"] = process_data(
-            root_dict[binary_name]["data"],
-            type_map,
-            base_address,
-            version_id,
-        )
-
-        data_map["types"] = KSY_STRUCT_MAP
-        data_map["enums"] = KSY_ENUM_MAP
-
-        data_folder = Path("src", version_id, "data")
+        data_map = DataParser(binary_name, base_address, version).process_data(root_dict[binary_name]["data"])
+        data_folder = Path("src", version, "data")
         data_folder.mkdir(parents=True, exist_ok=True)
         with Path(data_folder, f"{data_map_type_name}.ksy").open("w") as f:
             yaml.dump(data_map, f)
@@ -122,7 +110,7 @@ def process_binary_version(root_dict: dict, binary_name: str, version_id: str, t
         # TODO: We should add this last.
         pass
 
-    mapping_folder = Path("src", version_id)
+    mapping_folder = Path("src", version)
     mapping_folder.mkdir(parents=True, exist_ok=True)
     with Path(mapping_folder, f"{binary_name}.ksy").open("w") as f:
         yaml.dump(result_dict, f)
@@ -132,12 +120,10 @@ def process_binary_version(root_dict: dict, binary_name: str, version_id: str, t
 if __name__ == "__main__":
     yaml = ruamel.yaml.YAML()
 
-    type_map = build_type_map()
-
     for yaml_path in Path(SYMBOL_DIR).glob("*.yml"):
         with yaml_path.open("r") as f:
             current_yaml = yaml.load(f)
             binary_name = next(iter(current_yaml.keys()))
             for version in current_yaml[binary_name]["versions"]:
                 if version in ["EU", "NA", "JP"]:
-                    result = process_binary_version(current_yaml, binary_name, version, type_map)
+                    result = process_binary_version(current_yaml, binary_name, version)
