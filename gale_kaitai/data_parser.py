@@ -1,45 +1,16 @@
+from __future__ import annotations
+
+import copy
 import re
 from pathlib import Path
 
 from ruamel.yaml.scalarint import HexInt
 
+from header_type_mapping import KSY_TYPE_MAP, HeaderTypeMapping
+
 DATA_HEADER_DIR = "_pmdsky-debug/headers/data"
 
-KSY_TYPE_MAP = {
-    "uint8_t": "u1",
-    "uint16_t": "u2",
-    "uint32_t": "u4",
-    "uint64_t": "u8",
-    "int8_t": "s1",
-    "int16_t": "s2",
-    "int32_t": "s4",
-    "int64_t": "s8",
-    "char": "s1",
-    "short": "s2",
-    "int": "s4",
-    "uint": "u4",
-    "long": "s8",
-    "float": "f4",
-    "double": "f8",
-    "WORD": "u2",
-    "DWORD": "u4",
-    "__s32": "s4",
-    "__s64": "s8",
-    # Special pmdsky_debug typedefs
-    "undefined": "u1",
-    "undefined1": "u1",
-    "undefined2": "u2",
-    "undefined4": "u4",
-    "fx32_16": "s4",
-    "fx32_12": "s4",
-    "fx32_8": "s4",
-    "fx16_14": "s2",
-    "ufx32_16": "s4",
-    "ufx32_8": "s4",
-    "render_3d_element_fn_t": "u4",  # Pointer
-}
-
-KSY_STRUCT_MAP = {}
+KSY_STRUCT_MAP = HeaderTypeMapping.build_type_map()
 KSY_ENUM_MAP = {}
 
 
@@ -47,12 +18,12 @@ class DataParser:
     def __init__(
         self,
         binary_name: str,
-        base_address: int,
         version: str,
+        base_address: int,
     ) -> None:
         self.binary_name = binary_name
-        self.base_address = base_address
         self.version = version
+        self.base_address = base_address
         self.type_map = {}
         self.array_types = {}
         self.used_structs = {}
@@ -132,13 +103,21 @@ class DataParser:
                         data_name,
                     )
 
-    def _build_type_map(self) -> None:
+    def _get_header_file_name(self) -> str:
         header_file_name = f"{self.binary_name}.h"
         if self.binary_name == "overlay1":
             header_file_name = "overlay01.h"
         elif self.binary_name == "overlay9":
             header_file_name = "overlay09.h"
-        header_path = Path(DATA_HEADER_DIR, header_file_name)
+        elif self.binary_name == "itcm":
+            header_file_name = "arm9/itcm.h"
+        elif self.binary_name == "move_effects":
+            header_file_name = "overlay29/move_effects.h"
+
+        return header_file_name
+
+    def _build_type_map(self) -> None:
+        header_path = Path(DATA_HEADER_DIR, self._get_header_file_name())
         if not header_path.exists():
             if self.binary_name in ["overlay26", "overlay30"]:
                 # At the time of writing, these overlays do not have a header file.
@@ -162,6 +141,59 @@ class DataParser:
 
             self._parse_header(move_effects_path)
 
+    def _build_data_entry(
+        self,
+        data: dict,
+        type_lookup_name: str,
+    ) -> dict | None:
+        if ("length" not in data or self.version not in data["length"]) and type_lookup_name not in self.type_map:
+            print(
+                f"[WARNING][{self.version}]: Type mapping is required for",
+                type_lookup_name,
+                "since it has no documented length.",
+            )
+            return None
+
+        data_entry = {
+            "pos": HexInt(data["address"][self.version] - self.base_address),
+        }
+
+        if "description" in data:
+            data_entry["doc"] = data["description"]
+
+        if type_lookup_name in self.type_map:
+            data_entry["type"] = self.type_map[type_lookup_name]
+
+            if type_lookup_name in self.array_types:
+                if self.array_types[type_lookup_name] == 0:
+                    if "length" not in data or self.version not in data["length"]:
+                        print(
+                            f"[WARNING][{self.version}]: Skipping",
+                            type_lookup_name,
+                            "due to it being a variable length array,",
+                            "but there is not a length associated with it.",
+                        )
+                        return None
+                    data_entry["size"] = HexInt(data["length"][self.version])
+                    data_entry["type"] = f"{type_lookup_name}_entries"
+                    if f"{type_lookup_name}_entries" not in self.used_structs:
+                        self.used_structs[f"{type_lookup_name}_entries"] = {
+                            "seq": [
+                                {
+                                    "id": "entries",
+                                    "type": self.type_map[type_lookup_name],
+                                    "repeat": "eos",
+                                },
+                            ],
+                        }
+                else:
+                    data_entry["repeat"] = "expr"
+                    data_entry["repeat-expr"] = self.array_types[type_lookup_name]
+        else:
+            data_entry["size"] = HexInt(data["length"][self.version])
+
+        return data_entry
+
     def process_data(
         self,
         data_list: list[dict],
@@ -174,54 +206,17 @@ class DataParser:
             data_name = data["name"].lower().replace("__", "_")
 
             if isinstance(data["address"][self.version], list):
-                # TODO(DeltaJordan): Figure out how to handle address lists.
-                pass
+                for i, data_address in enumerate(data["address"][self.version]):
+                    current_data_name = f"{data_name}_{i}"
+                    data_copy = copy.deepcopy(data)
+                    data_copy["address"][self.version] = data_address
+                    data_entry = self._build_data_entry(data_copy, data_name)
+                    if data_entry:
+                        data_entries[current_data_name] = data_entry
             else:
-                if ("length" not in data or self.version not in data["length"]) and data_name not in self.type_map:
-                    print(
-                        f"[WARNING][{self.version}]: Type mapping is required for",
-                        data_name,
-                        "since it has no documented length.",
-                    )
-                    continue
-
-                data_entries[data_name] = {
-                    "pos": HexInt(data["address"][self.version] - self.base_address),
-                }
-
-                if "description" in data:
-                    data_entries[data_name]["doc"] = data["description"]
-
-                if data_name in self.type_map:
-                    data_entries[data_name]["type"] = self.type_map[data_name]
-
-                    if data_name in self.array_types:
-                        if self.array_types[data_name] == 0:
-                            if "length" not in data or self.version not in data["length"]:
-                                print(
-                                    f"[WARNING][{self.version}]: Skipping",
-                                    data_name,
-                                    "due to it being a variable length array,",
-                                    "but there is not a length associated with it.",
-                                )
-                                data_entries.pop(data_name, None)
-                                continue
-                            data_entries[data_name]["size"] = HexInt(data["length"][self.version])
-                            data_entries[data_name]["type"] = f"{data_name}_entries"
-                            self.used_structs[f"{data_name}_entries"] = {
-                                "seq": [
-                                    {
-                                        "id": "entries",
-                                        "type": self.type_map[data_name],
-                                        "repeat": "eos",
-                                    },
-                                ],
-                            }
-                        else:
-                            data_entries[data_name]["repeat"] = "expr"
-                            data_entries[data_name]["repeat-expr"] = self.array_types[data_name]
-                else:
-                    data_entries[data_name]["size"] = HexInt(data["length"][self.version])
+                data_entry = self._build_data_entry(data, data_name)
+                if data_entry:
+                    data_entries[data_name] = data_entry
 
         return {
             "meta": {

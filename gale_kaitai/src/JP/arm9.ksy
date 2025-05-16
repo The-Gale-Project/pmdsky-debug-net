@@ -11,8 +11,14 @@ meta:
   imports:
   - functions/arm9_functions
   - data/arm9_data
+  - subregions/itcm
+  - subregions/libs
 instances:
   functions:
     type: arm9_functions
   data:
     type: arm9_data
+  itcm:
+    type: itcm
+  libs:
+    type: libs

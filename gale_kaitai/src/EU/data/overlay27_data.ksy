@@ -4,27 +4,61 @@ meta:
 instances:
   discard_items_menu_items_confirm:
     pos: 0x281c
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   discard_items_submenu_items_1:
     pos: 0x2834
-    size: 0x20
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 4
   discard_items_submenu_items_2:
     pos: 0x2854
-    size: 0x20
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 4
   discard_items_main_menu_items:
     pos: 0x2874
-    size: 0x28
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 5
   discard_window_params_5:
     pos: 0x290c
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   discard_window_params_6:
     pos: 0x291c
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   discard_window_params_7:
     pos: 0x292c
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
-types: {}
+    type: window_params
+types:
+  simple_menu_id_item:
+  - id: string_id
+    type: u2
+  - id: _padding
+    type: u2
+  - id: result_value
+    type: s4
+  window_params:
+  - id: update
+    type: update_window_fn_t
+  - id: x_offset
+    type: u1
+  - id: y_offset
+    type: u1
+  - id: width
+    type: u1
+  - id: height
+    type: u1
+  - id: screen
+    type: screen_8
+  - id: box_type
+    type: box_type_8
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
 enums: {}

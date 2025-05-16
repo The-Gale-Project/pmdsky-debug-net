@@ -11,7 +11,9 @@ instances:
     size: 0x10
   start_menu_items_confirm:
     pos: 0xde4
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   overlay34_unknown_struct_na_22dd03c:
     pos: 0xdfc
     doc: |-
@@ -21,7 +23,9 @@ instances:
     size: 0x10
   dungeon_debug_menu_items:
     pos: 0xe0c
-    size: 0x28
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 5
   overlay34_reserved_space:
     pos: 0xe34
     doc: "Note: unverified, ported from Irdkwia's notes"
@@ -46,5 +50,12 @@ instances:
     pos: 0xe50
     doc: "Note: unverified, ported from Irdkwia's notes"
     size: 0x4
-types: {}
+types:
+  simple_menu_id_item:
+  - id: string_id
+    type: u2
+  - id: _padding
+    type: u2
+  - id: result_value
+    type: s4
 enums: {}

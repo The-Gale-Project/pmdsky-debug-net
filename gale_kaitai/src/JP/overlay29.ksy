@@ -9,8 +9,11 @@ meta:
   imports:
   - functions/overlay29_functions
   - data/overlay29_data
+  - subregions/move_effects
 instances:
   functions:
     type: overlay29_functions
   data:
     type: overlay29_data
+  move_effects:
+    type: move_effects

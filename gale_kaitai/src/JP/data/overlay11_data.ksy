@@ -16,7 +16,7 @@ instances:
       These opcodes underpin the various ExplorerScript functions you can call in the SkyTemple SSB debugger.
 
       type: struct script_opcode_table
-    size: 0xbf8
+    type: script_opcode_table
   c_routines:
     pos: 0x404ac
     doc: |-
@@ -25,7 +25,16 @@ instances:
       These routines underpin the ExplorerScript coroutines you can call in the SkyTemple SSB debugger.
 
       type: struct common_routine_table
-    size: 0x15e8
+    type: common_routine_table
+  ground_weather_table:
+    pos: 0x41a94
+    doc: |-
+      Note: unverified, ported from Irdkwia's notes
+
+      type: struct ground_weather_entry[12]
+    type: ground_weather_entry
+    repeat: expr
+    repeat-expr: 12
   ground_wan_files_table:
     pos: 0x41ac4
     doc: |-
@@ -41,6 +50,7 @@ instances:
       Table of objects for the script engine, which can be placed in scenes. There are a version-dependent number of 12-byte entries.
 
       type: struct script_object[length / 12]
+    type: objects_entries
     size: 0x1a04
   recruitment_table_locations:
     pos: 0x44518
@@ -73,29 +83,120 @@ instances:
       Irdkwia's notes: FIXED_FLOOR_GROUND_ASSOCIATION
 
       type: struct level_tilemap_list_entry[81]
-    size: 0x288
+    type: level_tilemap_list_entry
+    repeat: expr
+    repeat-expr: 81
   actor_function_table:
     pos: 0x45500
     doc: A function pointer table accessed when performing script opcodes on actors.
-    size: 0x50
+    type: ground_entity_function_table
+  setanimation_table:
+    pos: 0x45550
+    doc: |-
+      Table that associates the parameter of the SetAnimation scripting opcode to animation data.
+
+      The first entry is unused and has a value of 0xFFFF.
+    type: animation_data
+    repeat: expr
+    repeat-expr: 84
   object_function_table:
     pos: 0x45a80
     doc: A function pointer table accessed when performing script opcodes on objects.
-    size: 0x50
+    type: ground_entity_function_table
   performer_function_table:
     pos: 0x45d94
     doc: A function pointer table accessed when performing script opcodes on performers.
-    size: 0x50
+    type: ground_entity_function_table
+  team_info_box_default_window_params:
+    pos: 0x460e0
+    doc: Default window_params for a team_info_box.
+    type: window_params
+  overlay11_overlay_load_table:
+    pos: 0x46d08
+    doc: |-
+      The overlays that can be loaded while this one is loaded.
+
+      Each entry is 16 bytes, consisting of:
+      - overlay group ID (see arm9.yml or enum overlay_group_id in the C headers for a mapping between group ID and overlay number)
+      - function pointer to entry point
+      - function pointer to destructor
+      - possibly function pointer to frame-update function?
+
+      type: struct overlay_load_entry[21]
+    type: overlay_load_entry
+    repeat: expr
+    repeat-expr: 21
   ground_state_ptrs:
     pos: 0x48974
     doc: |-
       Host pointers to multiple structure used for performing an overworld scene
 
       type: struct main_ground_data
-    size: 0x18
+    type: main_ground_data
   world_map_mode:
     pos: 0x48a64
     doc: The current world map
     type: u4
-types: {}
+types:
+  script_opcode_table: []
+  common_routine_table: []
+  ground_weather_entry:
+  - id: field_0x0
+    type: s2
+  - id: field_0x2
+    type: s2
+  script_object:
+  - id: field_0x0
+    type: s2
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: field_0x8
+    type: u1
+  level_tilemap_list_entry:
+  - id: field_0x0
+    type: s2
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: field_0x4
+    type: u4
+  ground_entity_function_table:
+  - id: routine_kind
+    type: script_routine_kind_16
+  - id: padding
+    type: u2
+  animation_data:
+  - id: animation_id
+    type: u1
+  window_params:
+  - id: update
+    type: update_window_fn_t
+  - id: x_offset
+    type: u1
+  - id: y_offset
+    type: u1
+  - id: width
+    type: u1
+  - id: height
+    type: u1
+  - id: screen
+    type: screen_8
+  - id: box_type
+    type: box_type_8
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  overlay_load_entry:
+  - id: group
+    type: overlay_group_id
+  main_ground_data: []
+  objects_entries:
+    seq:
+    - id: entries
+      type: script_object
+      repeat: eos
 enums: {}

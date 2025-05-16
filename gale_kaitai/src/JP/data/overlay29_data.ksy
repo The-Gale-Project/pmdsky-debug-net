@@ -91,7 +91,9 @@ instances:
       This is an array of 11 4-byte entries containing info about one tile each. Info includes the trap ID if a trap, room ID, and flags.
 
       type: struct fixed_room_tile_spawn_entry[11]
-    size: 0x2c
+    type: fixed_room_tile_spawn_entry
+    repeat: expr
+    repeat-expr: 11
   treasure_box_1_item_ids:
     pos: 0x7379c
     doc: |-
@@ -116,7 +118,9 @@ instances:
       This is an array of 120 4-byte entries containing info about one monster each. Info includes the monster ID, stats, and behavior type.
 
       type: struct fixed_room_monster_spawn_entry[120]
-    size: 0x1e0
+    type: fixed_room_monster_spawn_entry
+    repeat: expr
+    repeat-expr: 120
   fixed_room_item_spawn_table:
     pos: 0x73a94
     doc: |-
@@ -125,7 +129,9 @@ instances:
       This is an array of 63 8-byte entries containing one item ID each.
 
       type: struct fixed_room_item_spawn_entry[63]
-    size: 0x1f8
+    type: fixed_room_item_spawn_entry
+    repeat: expr
+    repeat-expr: 63
   fixed_room_entity_spawn_table:
     pos: 0x73c8c
     doc: |-
@@ -134,7 +140,114 @@ instances:
       This is an array of 269 entries. Each entry contains 3 pointers (one into FIXED_ROOM_ITEM_SPAWN_TABLE, one into FIXED_ROOM_MONSTER_SPAWN_TABLE, and one into FIXED_ROOM_TILE_SPAWN_TABLE), and represents the entities that can spawn on one specific tile in a fixed room.
 
       type: struct fixed_room_entity_spawn_entry[269]
-    size: 0xc9c
+    type: fixed_room_entity_spawn_entry
+    repeat: expr
+    repeat-expr: 269
+  status_icon_array_muzzled:
+    pos: 0x74b5c
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::muzzled
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 2
+  status_icon_array_magnet_rise:
+    pos: 0x74b6c
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::magnet_rise
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 2
+  status_icon_array_miracle_eye:
+    pos: 0x74b8c
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::miracle_eye
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 3
+  status_icon_array_leech_seed:
+    pos: 0x74b9c
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::leech_seed
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 3
+  status_icon_array_long_toss:
+    pos: 0x74bb4
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::long_toss
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 3
+  status_icon_array_blinded:
+    pos: 0x74c0c
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::blinded
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 5
+  status_icon_array_burn:
+    pos: 0x74c34
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::burn
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 5
+  status_icon_array_sure_shot:
+    pos: 0x74c5c
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::sure_shot
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 5
+  status_icon_array_invisible:
+    pos: 0x74c84
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::invisible
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 5
+  status_icon_array_sleep:
+    pos: 0x74cac
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::sleep
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 8
+  status_icon_array_curse:
+    pos: 0x74cdc
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::curse
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 7
+  status_icon_array_freeze:
+    pos: 0x74d14
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::freeze
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 8
+  status_icon_array_cringe:
+    pos: 0x74d54
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::cringe
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 8
+  status_icon_array_bide:
+    pos: 0x74d94
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::bide
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 14
+  status_icon_array_reflect:
+    pos: 0x74e94
+    doc: Array of bit masks used to set monster::status_icon. Indexed by monster::statuses::reflect
+      * 8. See UpdateStatusIconFlags for details.
+    type: status_icon_flags
+    repeat: expr
+    repeat-expr: 18
   directions_xy:
     pos: 0x750bc
     doc: |-
@@ -144,6 +257,39 @@ instances:
     type: s2
     repeat: expr
     repeat-expr: 8
+  displacements_within_2_largest_first:
+    pos: 0x7517c
+    doc: |-
+      An array of displacement vectors with max norm <= 2, ordered in descending order by norm.
+
+      The last element, (99, 99), is invalid and used as an end marker.
+
+      type: position[26]
+    type: position
+    repeat: expr
+    repeat-expr: 26
+  displacements_within_2_smallest_first:
+    pos: 0x751e4
+    doc: |-
+      An array of displacement vectors with max norm <= 2, ordered in ascending order by norm.
+
+      The last element, (99, 99), is invalid and used as an end marker.
+
+      type: position[26]
+    type: position
+    repeat: expr
+    repeat-expr: 26
+  displacements_within_3:
+    pos: 0x7524c
+    doc: |-
+      An array of displacement vectors with max norm <= 3. The elements are vaguely in ascending order by norm, but not exactly.
+
+      The last element, (99, 99), is invalid and used as an end marker.
+
+      type: position[50]
+    type: position
+    repeat: expr
+    repeat-expr: 50
   fractional_turn_sequence:
     pos: 0x75c24
     doc: |-
@@ -174,10 +320,63 @@ instances:
       3. Boolean value for whether entity2 is a wild Pokémon.
       4. Boolean value for whether entity2 is a decoy.
     size: 0x20
+  damage_multiplier_0_5:
+    pos: 0x761dc
+    doc: A generic damage multiplier of 0.5 used in various places, as a 64-bit fixed-point
+      number with 16 fraction bits.
+    type: fx64_16
+  damage_multiplier_1_5:
+    pos: 0x761e4
+    doc: A generic damage multiplier of 1.5 used in various places, as a 64-bit fixed-point
+      number with 16 fraction bits.
+    type: fx64_16
+  damage_multiplier_2:
+    pos: 0x761ec
+    doc: A generic damage multiplier of 2 used in various places, as a 64-bit fixed-point
+      number with 16 fraction bits.
+    type: fx64_16
+  cloudy_damage_multiplier:
+    pos: 0x761fc
+    doc: The extra damage multiplier for non-Normal-type moves when the weather is
+      Cloudy, as a 64-bit fixed-point number with 16 fraction bits (0.75).
+    type: fx64_16
+  solid_rock_multiplier:
+    pos: 0x76204
+    doc: The extra damage multiplier for super-effective moves when Solid Rock or
+      Filter is active, as a 64-bit fixed-point number with 16 fraction bits (0.75).
+    type: fx64_16
+  damage_formula_max_base:
+    pos: 0x7620c
+    doc: The maximum value of the base damage formula (after DAMAGE_FORMULA_NON_TEAM_MEMBER_MODIFIER
+      application, if relevant), as a 64-bit binary fixed-point number with 16 fraction
+      bits (999).
+    type: fx64_16
+  damage_formula_min_base:
+    pos: 0x7621c
+    doc: The minimum value of the base damage formula (after DAMAGE_FORMULA_NON_TEAM_MEMBER_MODIFIER
+      application, if relevant), as a 64-bit binary fixed-point number with 16 fraction
+      bits (1).
+    type: fx64_16
+  type_damage_negating_exclusive_item_effects:
+    pos: 0x76244
+    doc: |-
+      List of exclusive item effects that negate damage of a certain type, terminated by a TYPE_NEUTRAL entry.
+
+      type: struct damage_negating_exclusive_eff_entry[28]
+    type: damage_negating_exclusive_eff_entry
+    repeat: expr
+    repeat-expr: 28
   two_turn_statuses:
     pos: 0x76400
     doc: Lists all status IDs that are for two-turn moves. The last entry is null.
     size: 0xb
+  two_turn_moves_and_statuses:
+    pos: 0x7644c
+    doc: List that matches two-turn move IDs to their corresponding status ID. The
+      last entry is null.
+    type: two_turn_move_and_status
+    repeat: expr
+    repeat-expr: 22
   spatk_stat_idx:
     pos: 0x76488
     doc: The index (1) of the special attack entry in internal stat structs, such
@@ -197,6 +396,17 @@ instances:
     type: s4
     repeat: expr
     repeat-expr: 10
+  map_color_table:
+    pos: 0x76970
+    doc: |-
+      In order: white, black, red, green, blue, magenta, dark pink, chartreuse, light orange
+
+      Note: unverified, ported from Irdkwia's notes
+
+      type: struct rgba[9]
+    type: rgba
+    repeat: expr
+    repeat-expr: 9
   gummi_like_string_ids:
     pos: 0x76c70
     doc: List that holds the string IDs for how much a monster liked a gummi in decreasing
@@ -241,6 +451,15 @@ instances:
 
       type: struct entity*
     type: u4
+  dungeon_prng_state:
+    pos: 0x76f10
+    doc: |-
+      [Runtime] The global PRNG state for dungeon mode, not including the current values in the secondary sequences.
+
+      This struct holds state for the primary LCG, as well as the current configuration controlling which LCG to use when generating random numbers. See DungeonRand16Bit for more information on how the dungeon PRNG works.
+
+      type: struct prng_state
+    type: prng_state
   dungeon_prng_state_secondary_values:
     pos: 0x76f24
     doc: |-
@@ -262,6 +481,15 @@ instances:
     doc: '[Runtime] Used to store the number of positions output by GetPossibleAiArcItemTargets
       and the number of directions/probabilities output by GetPossibleAiThrownItemDirections.'
     type: u4
+  default_tile:
+    pos: 0x770bc
+    doc: |-
+      The default tile struct.
+
+      This is just a struct full of zeroes, but is used as a fallback in various places where a "default" tile is needed, such as when a grid index is out of range.
+
+      type: struct tile
+    type: tile
   fixed_room_data_ptr:
     pos: 0x7712c
     doc: '[Runtime] Pointer to decoded fixed room data loaded from the BALANCE/fixed.bin
@@ -272,5 +500,88 @@ instances:
     doc: '[Runtime] Pointer to the dungeon fades struct that maintains the status
       of screen fades in dungeon mode.'
     type: u4
-types: {}
+types:
+  move_target_and_range: []
+  fixed_room_tile_spawn_entry:
+  - id: id
+    type: trap_id_8
+  - id: flags
+    type: u1
+  - id: room
+    type: u1
+  fixed_room_monster_spawn_entry:
+  - id: id
+    type: monster_id_16
+  - id: stat_table_idx
+    type: u1
+  - id: behavior
+    type: monster_behavior_8
+  fixed_room_item_spawn_entry:
+  - id: item
+    type: bulk_item
+  - id: field_0x4
+    type: u1
+  - id: field_0x5
+    type: u1
+  - id: field_0x6
+    type: u1
+  - id: field_0x7
+    type: u1
+  fixed_room_entity_spawn_entry: []
+  status_icon_flags:
+  - id: field_0x5
+    type: u1
+  - id: field_0x6
+    type: u1
+  - id: field_0x7
+    type: u1
+  position:
+  - id: x
+    type: s2
+  - id: y
+    type: s2
+  fx64_16:
+  - id: upper
+    type: s4
+  - id: lower
+    type: u4
+  damage_negating_exclusive_eff_entry:
+  - id: type
+    type: type_id
+  - id: effect
+    type: exclusive_item_effect_id
+  two_turn_move_and_status:
+  - id: move
+    type: move_id_16
+  - id: status
+    type: status_two_turn_id_16
+  rgba:
+  - id: r
+    type: u1
+  - id: g
+    type: u1
+  - id: b
+    type: u1
+  - id: a
+    type: u1
+  prng_state:
+  - id: use_secondary
+    type: s4
+  - id: seq_num_primary
+    type: u4
+  - id: preseed
+    type: u4
+  - id: last_value_primary
+    type: u4
+  - id: idx_secondary
+    type: s4
+  tile:
+  - id: spawn_or_visibility_flags
+    type: spawn_or_visibility_flags
+  - id: texture_id
+    type: u2
+  - id: field_0x6
+    type: u1
+  - id: room
+    type: u1
 enums: {}

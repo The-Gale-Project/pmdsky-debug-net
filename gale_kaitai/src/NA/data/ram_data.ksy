@@ -23,14 +23,16 @@ instances:
       Including the allocator metadata, this arena occupies 0xB0000 bytes of space.
 
       type: struct mem_arena
-    size: 0x1c
+    type: mem_arena
   ground_memory_arena_2_blocks:
     pos: 0x145a24
     doc: |-
       The block array for GROUND_MEMORY_ARENA_2.
 
       type: struct mem_block[32]
-    size: 0x300
+    type: mem_block
+    repeat: expr
+    repeat-expr: 32
   ground_memory_arena_2_memory:
     pos: 0x145d24
     doc: The memory region for GROUND_MEMORY_ARENA_2.
@@ -61,7 +63,7 @@ instances:
       Pointed to by MOVE_DATA_TABLE_PTR in the ARM 9 binary.
 
       type: struct move_data_table
-    size: 0x38c6
+    type: move_data_table
   sound_memory_arena:
     pos: 0x24efa0
     doc: |-
@@ -72,14 +74,16 @@ instances:
       It's referenced by various sound functions like LoadDseFile, PlaySeLoad, and PlayBgm when allocating memory.
 
       type: struct mem_arena
-    size: 0x1c
+    type: mem_arena
   sound_memory_arena_blocks:
     pos: 0x24efbc
     doc: |-
       The block array for SOUND_MEMORY_ARENA.
 
       type: struct mem_block[20]
-    size: 0x1e0
+    type: mem_block
+    repeat: expr
+    repeat-expr: 20
   sound_memory_arena_memory:
     pos: 0x24f19c
     doc: |-
@@ -89,11 +93,21 @@ instances:
     type: u1
     repeat: expr
     repeat-expr: 245252
+  frames_since_launch_0:
+    pos: 0x2a354c
+    doc: Starts at 0 when the game is first launched, and continuously ticks up once
+      per frame while the game is running.
+    type: u4
+  frames_since_launch_1:
+    pos: 0x2a359c
+    doc: Starts at 0 when the game is first launched, and continuously ticks up once
+      per frame while the game is running.
+    type: u4
   touchscreen_status:
     pos: 0x2a35dc
     doc: Status of the touchscreen, including the coordinates of the currently pressed
       position in pixels.
-    size: 0x104
+    type: touchscreen_status
   bag_items:
     pos: 0x2a3824
     doc: |-
@@ -102,7 +116,9 @@ instances:
       While the game only allows a maximum of 48 items during normal play, it seems to read up to 50 item slots if filled.
 
       type: struct item[50]
-    size: 0x12c
+    type: item
+    repeat: expr
+    repeat-expr: 50
   bag_items_ptr:
     pos: 0x2a3ba8
     doc: Pointer to BAG_ITEMS.
@@ -137,12 +153,16 @@ instances:
       If there are fewer than 8 items, the array is expected to be null-terminated.
 
       type: struct bulk_item[8]
-    size: 0x20
+    type: bulk_item
+    repeat: expr
+    repeat-expr: 8
   unused_kecleon_shop_items:
     pos: 0x2a4b74
     doc: Seems to be another array like KECLEON_SHOP_ITEMS, but don't actually appear
       to be used by the Kecleon Shop.
-    size: 0x20
+    type: bulk_item
+    repeat: expr
+    repeat-expr: 8
   kecleon_wares_items_ptr:
     pos: 0x2a4b94
     doc: Pointer to KECLEON_WARES_ITEMS.
@@ -155,12 +175,16 @@ instances:
       If there are fewer than 4 items, the array is expected to be null-terminated.
 
       type: struct bulk_item[4]
-    size: 0x10
+    type: bulk_item
+    repeat: expr
+    repeat-expr: 4
   unused_kecleon_wares_items:
     pos: 0x2a4ba8
     doc: Seems to be another array like KECLEON_WARES_ITEMS, but don't actually appear
       to be used by Kecleon Wares.
-    size: 0x10
+    type: bulk_item
+    repeat: expr
+    repeat-expr: 4
   money_carried:
     pos: 0x2a4bb8
     doc: The amount of money the player is currently carrying.
@@ -174,7 +198,9 @@ instances:
     doc: Buffer used to store audio commands. 16 entries in total. Seems like entries
       are removed at some point (maybe after the commands are read or after they finish
       executing).
-    size: 0x200
+    type: audio_command
+    repeat: expr
+    repeat-expr: 16
   sound_memory_arena_ptr:
     pos: 0x2a4e54
     doc: Pointer to SOUND_MEMORY_ARENA.
@@ -187,7 +213,7 @@ instances:
       Note that this array isn't strictly ordered in any way. A newly created window will occupy the first available slot. If a window in an early slot is destroyed, windows that are still active in later slots won't be shifted back unless destroyed and recreated.
 
       type: struct window_list
-    size: 0x1180
+    type: window_list
   cursor_16_sprite_id:
     pos: 0x2aac64
     doc: Id of the "FONT/cursor_16.wan" sprite loaded in WAN_TABLE
@@ -214,7 +240,7 @@ instances:
       Move struct of the last new move introduced when learning a new move. Persists even after the move selection is made in the menu.
 
       type: struct move
-    size: 0x8
+    type: move
   script_vars_values:
     pos: 0x2ab0ac
     doc: |-
@@ -223,7 +249,7 @@ instances:
       Note that with the script variable list defined in SCRIPT_VARS, the used length of this table is actually only 0x2B4. However, the real length of this table is 0x400 based on the game code.
 
       type: struct script_var_value_table
-    size: 0x400
+    type: script_var_value_table
   bag_level:
     pos: 0x2ab15c
     doc: The player's bag level, which determines the bag capacity. This indexes directly
@@ -244,7 +270,7 @@ instances:
       The file stream utilized for all Kaomado portrait loads.
 
       type: struct file_stream
-    size: 0x48
+    type: file_stream
   pending_dungeon_id:
     pos: 0x2ab4fc
     doc: |-
@@ -288,7 +314,9 @@ instances:
       Buffer used to stored a monster's decompressed level up data. Used by GetLvlUpEntry.
 
       Exact size is a guess (100 levels * 12 bytes per entry = 1200 = 0x4B0).
-    size: 0x4b0
+    type: level_up_entry
+    repeat: expr
+    repeat-expr: 100
   team_member_table:
     pos: 0x2abde0
     doc: |-
@@ -297,7 +325,7 @@ instances:
       See the comments on struct team_member_table for more information.
 
       type: struct team_member_table
-    size: 0x99a8
+    type: team_member_table
   disp_mode:
     pos: 0x2b9588
     type: u2
@@ -310,13 +338,17 @@ instances:
       Bitset of enabled VRAM banks
 
       type: vram_banks_set
-    size: 0x2
+    type: vram_banks_set
   sub_bg_ext_pltt:
     pos: 0x2b95a8
     type: u4
   clr_img:
     pos: 0x2b95c4
     type: u4
+  thread_info_struct:
+    pos: 0x2b9648
+    doc: thread_info struct that contains global state about threads
+    type: thread_info
   frames_since_launch_times_three:
     pos: 0x2b99c4
     doc: Starts at 0 when the game is first launched, and ticks up by 3 per frame
@@ -347,14 +379,16 @@ instances:
       Including the allocator metadata, this arena occupies 0x64000 bytes of space.
 
       type: struct mem_arena
-    size: 0x1c
+    type: mem_arena
   ground_memory_arena_1_blocks:
     pos: 0x324fdc
     doc: |-
       The block array for GROUND_MEMORY_ARENA_1.
 
       type: struct mem_block[52]
-    size: 0x4e0
+    type: mem_block
+    repeat: expr
+    repeat-expr: 52
   ground_memory_arena_1_memory:
     pos: 0x3254bc
     doc: The memory region for GROUND_MEMORY_ARENA_1.
@@ -363,7 +397,7 @@ instances:
     repeat-expr: 408324
   sentry_duty_struct:
     pos: 0x37a5d0
-    size: 0x38d4
+    type: sentry_duty
   turning_on_the_spot_flag:
     pos: 0x37c9a6
     doc: '[Runtime] Flag for whether the player is turning on the spot (pressing Y).'
@@ -439,6 +473,891 @@ instances:
       This data is populated as the dungeon floor is generated.
 
       type: struct floor_generation_status
-    size: 0x40
-types: {}
+    type: floor_generation_status
+types:
+  mem_arena:
+  - id: content_flags
+    type: u4
+  - id: n_blocks
+    type: u4
+  - id: max_blocks
+    type: u4
+  - id: len
+    type: u4
+  mem_block:
+  - id: available
+    type: u4
+  - id: used
+    type: u4
+  move_data_table: []
+  touchscreen_status:
+  - id: current_position
+    type: touchscreen_position
+  - id: field_0xC
+    type: u1
+  - id: field_0xD
+    type: u1
+  - id: field_0xE
+    type: u1
+  - id: field_0xF
+    type: u1
+  - id: pressed_frames
+    type: s4
+  - id: unpressed_frames
+    type: s4
+  - id: x_pos_mirror
+    type: s4
+  - id: y_pos_mirror
+    type: s4
+  - id: last_x_pos
+    type: s4
+  - id: last_y_pos
+    type: s4
+  - id: first_x_pos
+    type: s4
+  - id: first_y_pos
+    type: s4
+  - id: field_0x30
+    type: u1
+  - id: field_0x31
+    type: u1
+  - id: field_0x32
+    type: u1
+  - id: field_0x33
+    type: u1
+  - id: field_0x34
+    type: u1
+  - id: field_0x35
+    type: u1
+  - id: field_0x36
+    type: u1
+  - id: field_0x37
+    type: u1
+  - id: current_position_mirror
+    type: touchscreen_position
+  - id: current_position_mirror_1
+    type: touchscreen_position
+  - id: current_position_mirror_2
+    type: touchscreen_position
+  - id: current_position_mirror_3
+    type: touchscreen_position
+  item:
+  - id: held_by
+    type: u1
+  - id: quantity
+    type: u2
+  - id: id
+    type: item_id_16
+  bulk_item:
+  - id: id
+    type: item_id_16
+  - id: quantity
+    type: u2
+  audio_command:
+  - id: status
+    type: s4
+  - id: music_id
+    type: music_id_16
+  - id: volume
+    type: u2
+  - id: field_0x8
+    type: u2
+  - id: field_0xA
+    type: u1
+  - id: field_0xB
+    type: u1
+  - id: field_0xC
+    type: u1
+  - id: field_0xD
+    type: u1
+  - id: field_0xE
+    type: u1
+  - id: field_0xF
+    type: u1
+  - id: field_0x10
+    type: u1
+  - id: field_0x11
+    type: u1
+  - id: field_0x12
+    type: u1
+  - id: field_0x13
+    type: u1
+  - id: field_0x14
+    type: u1
+  - id: field_0x15
+    type: u1
+  - id: field_0x16
+    type: u1
+  - id: field_0x17
+    type: u1
+  - id: field_0x18
+    type: u1
+  - id: field_0x19
+    type: u1
+  - id: field_0x1A
+    type: u1
+  - id: field_0x1B
+    type: u1
+  - id: field_0x1C
+    type: u1
+  - id: field_0x1D
+    type: u1
+  - id: field_0x1E
+    type: u1
+  - id: field_0x1F
+    type: u1
+  window_list: []
+  move:
+  - id: field_0x1
+    type: u1
+  - id: id
+    type: move_id_16
+  - id: pp
+    type: u1
+  - id: ginseng
+    type: u1
+  script_var_value_table:
+  - id: version
+    type: s4
+  - id: condition
+    type: s4
+  - id: recycle_count
+    type: u4
+  - id: ground_enter
+    type: s2
+  - id: ground_getout
+    type: s2
+  - id: ground_map
+    type: s2
+  - id: ground_place
+    type: s2
+  - id: dungeon_select
+    type: s2
+  - id: dungeon_enter
+    type: s2
+  - id: dungeon_enter_mode
+    type: s2
+  - id: dungeon_enter_index
+    type: s2
+  - id: hero_first_kind
+    type: s2
+  - id: partner_first_kind
+    type: s2
+  - id: random_request_npc03_kind
+    type: s2
+  - id: event_local
+    type: s2
+  - id: dungeon_event_local
+    type: s2
+  - id: request_thanks_result_kind
+    type: s2
+  - id: request_thanks_result_variation
+    type: s2
+  - id: dungeon_enter_frequency
+    type: u2
+  - id: scenario_balance_flag
+    type: s1
+  - id: scenario_balance_debug
+    type: s1
+  - id: hero_talk_kind
+    type: s1
+  - id: partner_talk_kind
+    type: s1
+  - id: config_color_kind
+    type: s1
+  - id: rom_variation
+    type: s1
+  - id: special_episode_type
+    type: s1
+  - id: crystal_color_01
+    type: u1
+  - id: crystal_color_02
+    type: u1
+  - id: crystal_color_03
+    type: u1
+  - id: compulsory_save_point
+    type: u1
+  - id: compulsory_save_point_side
+    type: u1
+  - id: ground_enter_link
+    type: u1
+  - id: dungeon_result
+    type: u1
+  - id: ground_start_mode
+    type: u1
+  - id: request_clear_count
+    type: u1
+  - id: player_kind
+    type: u1
+  - id: attendant1_kind
+    type: u1
+  - id: attendant2_kind
+    type: u1
+  - id: world_map_level
+    type: u1
+  - id: lottery_result
+    type: u1
+  - id: sub30_spot_level
+    type: u1
+  - id: team_rank_event_level
+    type: u1
+  - id: play_old_game
+    type: u1
+  file_stream:
+  - id: field_0x0
+    type: u4
+  - id: field_0x4
+    type: u4
+  - id: field_0x8
+    type: u4
+  - id: field_0xc
+    type: u4
+  - id: field_0x10
+    type: u4
+  - id: field_0x14
+    type: u4
+  - id: field_0x18
+    type: u4
+  - id: field_0x1c
+    type: u4
+  - id: field_0x20
+    type: u4
+  - id: field_0x30
+    type: u4
+  - id: field_0x34
+    type: u4
+  - id: field_0x38
+    type: u4
+  - id: field_0x3c
+    type: u4
+  - id: field_0x40
+    type: u4
+  - id: field_0x44
+    type: u4
+  level_up_entry:
+  - id: total_exp
+    type: u4
+  - id: hp
+    type: u2
+  - id: atk
+    type: u1
+  - id: sp_atk
+    type: u1
+  - id: def
+    type: u1
+  - id: sp_def
+    type: u1
+  - id: field_0xA
+    type: u1
+  - id: field_0xB
+    type: u1
+  team_member_table:
+  - id: floor
+    type: the
+  - id: number_active_team_members_main
+    type: s2
+  - id: number_active_team_members_se
+    type: s2
+  - id: number_active_team_members_rescue
+    type: s2
+  - id: field_0x986e
+    type: u1
+  - id: field_0x986f
+    type: u1
+  - id: field_0x9874
+    type: u1
+  - id: field_0x9875
+    type: u1
+  - id: field_0x9876
+    type: u1
+  - id: active_team
+    type: team_id_8
+  - id: field_0x9878
+    type: u4
+  - id: field_0x987C
+    type: u4
+  - id: explorer_maze_team_native_language
+    type: s1
+  - id: field_0x9881
+    type: u1
+  - id: field_0x9896
+    type: u1
+  - id: field_0x9897
+    type: u1
+  vram_banks_set: []
+  thread_info:
+  - id: field_0x0
+    type: u1
+  - id: field_0x1
+    type: u1
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: field_0x4
+    type: u1
+  - id: field_0x5
+    type: u1
+  - id: field_0x6
+    type: u1
+  - id: field_0x7
+    type: u1
+  - id: field_0xC
+    type: u1
+  - id: field_0xD
+    type: u1
+  - id: field_0xE
+    type: u1
+  - id: field_0xF
+    type: u1
+  - id: field_0x10
+    type: u1
+  - id: field_0x11
+    type: u1
+  - id: field_0x12
+    type: u1
+  - id: field_0x13
+    type: u1
+  - id: field_0x14
+    type: u1
+  - id: field_0x15
+    type: u1
+  - id: field_0x16
+    type: u1
+  - id: field_0x17
+    type: u1
+  - id: field_0x18
+    type: u1
+  - id: field_0x19
+    type: u1
+  - id: field_0x1A
+    type: u1
+  - id: field_0x1B
+    type: u1
+  - id: field_0x1C
+    type: u1
+  - id: field_0x1D
+    type: u1
+  - id: field_0x1E
+    type: u1
+  - id: field_0x1F
+    type: u1
+  - id: thread_count
+    type: s4
+  - id: field_0x24
+    type: u1
+  - id: field_0x25
+    type: u1
+  - id: field_0x26
+    type: u1
+  - id: field_0x27
+    type: u1
+  - id: field_0x30
+    type: u1
+  - id: field_0x31
+    type: u1
+  - id: field_0x32
+    type: u1
+  - id: field_0x33
+    type: u1
+  sentry_duty:
+  - id: field_0x0
+    type: u1
+  - id: field_0x1
+    type: u1
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: field_0x4
+    type: u1
+  - id: field_0x5
+    type: u1
+  - id: field_0x6
+    type: u1
+  - id: field_0x7
+    type: u1
+  - id: field_0x8
+    type: u1
+  - id: field_0x9
+    type: u1
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  - id: field_0xc
+    type: s4
+  - id: field_0x10
+    type: s4
+  - id: field_0x14
+    type: s4
+  - id: field_0x18
+    type: s4
+  - id: field_0x1c
+    type: u1
+  - id: field_0x1d
+    type: u1
+  - id: field_0x1e
+    type: u1
+  - id: field_0x1f
+    type: u1
+  - id: field_0x20
+    type: u1
+  - id: field_0x21
+    type: u1
+  - id: field_0x22
+    type: u1
+  - id: field_0x23
+    type: u1
+  - id: field_0x24
+    type: u1
+  - id: field_0x25
+    type: u1
+  - id: field_0x26
+    type: u1
+  - id: field_0x27
+    type: u1
+  - id: field_0x28
+    type: u1
+  - id: field_0x29
+    type: u1
+  - id: field_0x2a
+    type: u1
+  - id: field_0x2b
+    type: u1
+  - id: field_0x2c
+    type: u1
+  - id: field_0x2d
+    type: u1
+  - id: field_0x2e
+    type: u1
+  - id: field_0x2f
+    type: u1
+  - id: field_0x30
+    type: u1
+  - id: field_0x31
+    type: u1
+  - id: field_0x32
+    type: u1
+  - id: field_0x33
+    type: u1
+  - id: field_0x34
+    type: u1
+  - id: field_0x35
+    type: u1
+  - id: field_0x36
+    type: u1
+  - id: field_0x37
+    type: u1
+  - id: field_0x38
+    type: u1
+  - id: field_0x39
+    type: u1
+  - id: field_0x3a
+    type: u1
+  - id: field_0x3b
+    type: u1
+  - id: field_0x3c
+    type: u1
+  - id: field_0x3d
+    type: u1
+  - id: field_0x3e
+    type: u1
+  - id: field_0x3f
+    type: u1
+  - id: field_0x40
+    type: u1
+  - id: field_0x41
+    type: u1
+  - id: field_0x42
+    type: u1
+  - id: field_0x43
+    type: u1
+  - id: field_0x44
+    type: u1
+  - id: field_0x45
+    type: u1
+  - id: field_0x46
+    type: u1
+  - id: field_0x47
+    type: u1
+  - id: field_0x48
+    type: u1
+  - id: field_0x49
+    type: u1
+  - id: field_0x4a
+    type: u1
+  - id: field_0x4b
+    type: u1
+  - id: field_0x4c
+    type: u1
+  - id: field_0x4d
+    type: u1
+  - id: field_0x4e
+    type: u1
+  - id: field_0x4f
+    type: u1
+  - id: field_0x50
+    type: u1
+  - id: field_0x51
+    type: u1
+  - id: field_0x52
+    type: u1
+  - id: field_0x53
+    type: u1
+  - id: field_0x54
+    type: u1
+  - id: field_0x55
+    type: u1
+  - id: field_0x56
+    type: u1
+  - id: field_0x57
+    type: u1
+  - id: field_0x58
+    type: u1
+  - id: field_0x59
+    type: u1
+  - id: field_0x5a
+    type: u1
+  - id: field_0x5b
+    type: u1
+  - id: field_0x5c
+    type: u1
+  - id: field_0x5d
+    type: u1
+  - id: field_0x5e
+    type: u1
+  - id: field_0x5f
+    type: u1
+  - id: field_0x60
+    type: u1
+  - id: field_0x61
+    type: u1
+  - id: field_0x62
+    type: u1
+  - id: field_0x63
+    type: u1
+  - id: field_0x64
+    type: u1
+  - id: field_0x65
+    type: u1
+  - id: field_0x66
+    type: u1
+  - id: field_0x67
+    type: u1
+  - id: field_0x68
+    type: u1
+  - id: field_0x69
+    type: u1
+  - id: field_0x6a
+    type: u1
+  - id: field_0x6b
+    type: u1
+  - id: field_0x6c
+    type: u1
+  - id: field_0x6d
+    type: u1
+  - id: field_0x6e
+    type: u1
+  - id: field_0x6f
+    type: u1
+  - id: field_0x70
+    type: u1
+  - id: field_0x71
+    type: u1
+  - id: field_0x72
+    type: u1
+  - id: field_0x73
+    type: u1
+  - id: field_0x74
+    type: u1
+  - id: field_0x75
+    type: u1
+  - id: field_0x76
+    type: u1
+  - id: field_0x77
+    type: u1
+  - id: field_0x78
+    type: u1
+  - id: field_0x79
+    type: u1
+  - id: field_0x7a
+    type: u1
+  - id: field_0x7b
+    type: u1
+  - id: field_0x7c
+    type: u1
+  - id: field_0x7d
+    type: u1
+  - id: field_0x7e
+    type: u1
+  - id: field_0x7f
+    type: u1
+  - id: field_0x80
+    type: u1
+  - id: field_0x81
+    type: u1
+  - id: field_0x82
+    type: u1
+  - id: field_0x83
+    type: u1
+  - id: field_0x84
+    type: u1
+  - id: field_0x85
+    type: u1
+  - id: field_0x86
+    type: u1
+  - id: field_0x87
+    type: u1
+  - id: field_0x88
+    type: u1
+  - id: field_0x89
+    type: u1
+  - id: field_0x8a
+    type: u1
+  - id: field_0x8b
+    type: u1
+  - id: field_0x8c
+    type: u1
+  - id: field_0x8d
+    type: u1
+  - id: field_0x8e
+    type: u1
+  - id: field_0x8f
+    type: u1
+  - id: field_0x90
+    type: u1
+  - id: field_0x91
+    type: u1
+  - id: field_0x92
+    type: u1
+  - id: field_0x93
+    type: u1
+  - id: field_0x94
+    type: u1
+  - id: field_0x95
+    type: u1
+  - id: field_0x96
+    type: u1
+  - id: field_0x97
+    type: u1
+  - id: field_0x98
+    type: u1
+  - id: field_0x99
+    type: u1
+  - id: field_0x9a
+    type: u1
+  - id: field_0x9b
+    type: u1
+  - id: field_0x9c
+    type: u1
+  - id: field_0x9d
+    type: u1
+  - id: field_0x9e
+    type: u1
+  - id: field_0x9f
+    type: u1
+  - id: field_0xa0
+    type: u1
+  - id: field_0xa1
+    type: u1
+  - id: field_0xa2
+    type: u1
+  - id: field_0xa3
+    type: u1
+  - id: dialogue_args
+    type: preprocessor_args
+  - id: field_0xf4
+    type: u1
+  - id: field_0xf5
+    type: u1
+  - id: field_0xf6
+    type: u1
+  - id: field_0xf7
+    type: u1
+  - id: field_0xf8
+    type: u1
+  - id: field_0xf9
+    type: u1
+  - id: field_0xfa
+    type: u1
+  - id: field_0xfb
+    type: u1
+  - id: field_0xfc
+    type: u1
+  - id: field_0xfd
+    type: u1
+  - id: field_0xfe
+    type: u1
+  - id: field_0xff
+    type: u1
+  - id: field_0x100
+    type: u1
+  - id: field_0x101
+    type: u1
+  - id: field_0x102
+    type: u1
+  - id: field_0x103
+    type: u1
+  - id: completion_state
+    type: sentry_completion_state
+  - id: game_state
+    type: s4
+  - id: control_state
+    type: sentry_control_state
+  - id: next_game_state
+    type: s4
+  - id: prev_dialogue_str_id
+    type: s4
+  - id: field_0x118
+    type: s4
+  - id: field_0x11c
+    type: s4
+  - id: field_0x120
+    type: animation
+  - id: field_0x1e4
+    type: animation
+  - id: field_0x2a8
+    type: animation
+  - id: field_0x29b4
+    type: animation
+  - id: field_0x33a8
+    type: animation
+  - id: field_0x346c
+    type: animation
+  - id: field_0x3530
+    type: u1
+  - id: field_0x3531
+    type: u1
+  - id: field_0x3532
+    type: u1
+  - id: field_0x3533
+    type: u1
+  - id: field_0x3534
+    type: s4
+  - id: field_0x3538
+    type: s4
+  - id: field_0x353c
+    type: s4
+  - id: field_0x3540
+    type: s4
+  - id: round_display
+    type: s4
+  - id: field_0x3568
+    type: s4
+  - id: field_0x356c
+    type: s4
+  - id: field_0x3870
+    type: u1
+  - id: field_0x3871
+    type: u1
+  - id: field_0x3872
+    type: u1
+  - id: field_0x3873
+    type: u1
+  - id: field_0x3874
+    type: s4
+  - id: field_0x3878
+    type: s4
+  - id: right_answer_slot
+    type: s4
+  - id: right_answer_data_idx
+    type: s4
+  - id: round
+    type: s4
+  - id: field_0x3888
+    type: s4
+  - id: points
+    type: s4
+  - id: field_0x3890
+    type: s4
+  - id: field_0x3894
+    type: s4
+  - id: field_0x3898
+    type: s4
+  - id: field_0x389c
+    type: u1
+  - id: field_0x389d
+    type: u1
+  - id: field_0x389e
+    type: u1
+  - id: field_0x389f
+    type: u1
+  - id: field_0x38a0
+    type: u1
+  - id: field_0x38a1
+    type: u1
+  - id: field_0x38aa
+    type: u1
+  - id: field_0x38ab
+    type: u1
+  - id: field_0x38ac
+    type: s4
+  - id: field_0x38b0
+    type: s4
+  - id: field_0x38b4
+    type: s4
+  - id: hero_str_id
+    type: s2
+  - id: partner_str_id
+    type: s2
+  floor_generation_status:
+  - id: second_spawn
+    type: bool
+  - id: has_monster_house
+    type: bool
+  - id: stairs_room
+    type: u1
+  - id: has_kecleon_shop
+    type: bool
+  - id: has_chasms_as_secondary_terrain
+    type: bool
+  - id: is_invalid
+    type: bool
+  - id: floor_size
+    type: floor_size_8
+  - id: has_maze
+    type: bool
+  - id: no_enemy_spawns
+    type: bool
+  - id: field_0x9
+    type: u1
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  - id: kecleon_shop_spawn_chance
+    type: s2
+  - id: field_0xe
+    type: u1
+  - id: field_0xf
+    type: u1
+  - id: monster_house_spawn_chance
+    type: s2
+  - id: field_0x12
+    type: u1
+  - id: field_0x13
+    type: u1
+  - id: n_rooms
+    type: s4
+  - id: secondary_structures_budget
+    type: s4
+  - id: hidden_stairs_spawn
+    type: position
+  - id: kecleon_shop_middle
+    type: position
+  - id: n_tiles_reachable_from_stairs
+    type: s4
+  - id: layout
+    type: floor_layout
+  - id: hidden_stairs_type
+    type: hidden_stairs_type
+  - id: kecleon_shop_min_x
+    type: s4
+  - id: kecleon_shop_min_y
+    type: s4
+  - id: kecleon_shop_max_x
+    type: s4
+  - id: kecleon_shop_max_y
+    type: s4
 enums: {}

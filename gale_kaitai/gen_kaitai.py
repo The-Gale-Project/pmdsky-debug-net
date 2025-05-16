@@ -1,43 +1,34 @@
-import re
 from pathlib import Path
 
 import ruamel.yaml
-from ruamel.yaml.scalarint import HexInt
 
 from data_parser import DataParser
+from function_parser import FunctionParser
 
 SYMBOL_DIR = "_pmdsky-debug/symbols"
 
 
-def to_snake_case(s: str) -> str:
-    # Replace hyphens with spaces, then apply regular expression substitutions for title case conversion
-    # and add an underscore between words, finally convert the result to lowercase
-    return "_".join(re.sub("([A-Z][a-z]+)", r" \1", re.sub("([A-Z]+)", r" \1", s.replace("-", " "))).split()).lower()
+def process_subregion(
+    parent_binary: str,
+    subregion_file_name: str,
+    version: str,
+) -> None:
+    subregion_path = Path(SYMBOL_DIR, parent_binary, subregion_file_name)
+    if not subregion_path.exists():
+        print(f"[ERROR][{parent_binary}][{version}][process_subregion]: File not found {subregion_file_name}.")
+        raise ValueError
+
+    with subregion_path.open() as f:
+        subregion_yaml = yaml.load(f)
+        process_binary_version(subregion_yaml, subregion_path.stem, version, Path("src", version, "subregions"))
 
 
-def process_functions(function_list: list[dict], base_address: int, version_id: str) -> dict:
-    result_dict = {}
-    for function in function_list:
-        if "address" not in function or version_id not in function["address"]:
-            continue
-
-        function_name = to_snake_case(function["name"]).strip("_")
-
-        if isinstance(function["address"][version_id], list):
-            # TODO(DeltaJordan): Figure out how to handle address lists.
-            pass
-        else:
-            result_dict[function_name] = {
-                "value": HexInt(function["address"][version_id] - base_address),
-            }
-
-            if "description" in function:
-                result_dict[function_name]["doc"] = function["description"]
-
-    return result_dict
-
-
-def process_binary_version(root_dict: dict, binary_name: str, version: str) -> dict:
+def process_binary_version(
+    root_dict: dict,
+    binary_name: str,
+    version: str,
+    destination: Path,
+) -> None:
     result_dict = {}
 
     # Get base address
@@ -75,20 +66,11 @@ def process_binary_version(root_dict: dict, binary_name: str, version: str) -> d
             "type": function_map_type_name,
         }
 
-        function_map = {
-            "doc": f"List of functions within {binary_name.upper()} with relative address locations as their values.",
-        }
-        function_map["meta"] = {
-            "id": function_map_type_name,
-            "endian": "le",
-        }
-        function_map["instances"] = process_functions(
+        function_map = FunctionParser(binary_name, version, base_address).process_functions(
             root_dict[binary_name]["functions"],
-            base_address,
-            version,
         )
 
-        function_folder = Path("src", f"{version}", "functions")
+        function_folder = Path(destination, "functions")
         function_folder.mkdir(parents=True, exist_ok=True)
         with Path(function_folder, f"{function_map_type_name}.ksy").open("w") as f:
             yaml.dump(function_map, f)
@@ -100,20 +82,24 @@ def process_binary_version(root_dict: dict, binary_name: str, version: str) -> d
         result_dict["instances"]["data"] = {}
         result_dict["instances"]["data"]["type"] = data_map_type_name
 
-        data_map = DataParser(binary_name, base_address, version).process_data(root_dict[binary_name]["data"])
-        data_folder = Path("src", version, "data")
+        data_map = DataParser(binary_name, version, base_address).process_data(root_dict[binary_name]["data"])
+        data_folder = Path(destination, "data")
         data_folder.mkdir(parents=True, exist_ok=True)
         with Path(data_folder, f"{data_map_type_name}.ksy").open("w") as f:
             yaml.dump(data_map, f)
             f.flush()
 
     if "subregions" in root_dict[binary_name]:
-        # TODO(DeltaJordan): Figure out how to handle subregions.
-        pass
+        subregion: str
+        for subregion in root_dict[binary_name]["subregions"]:
+            process_subregion(binary_name, subregion, version)
+            result_dict["meta"]["imports"].append(f"subregions/{subregion.removesuffix('.yml')}")
+            result_dict["instances"][subregion.removesuffix(".yml")] = {
+                "type": subregion.removesuffix(".yml"),
+            }
 
-    mapping_folder = Path("src", version)
-    mapping_folder.mkdir(parents=True, exist_ok=True)
-    with Path(mapping_folder, f"{binary_name}.ksy").open("w") as f:
+    destination.mkdir(parents=True, exist_ok=True)
+    with Path(destination, f"{binary_name}.ksy").open("w") as f:
         yaml.dump(result_dict, f)
         f.flush()
 
@@ -124,7 +110,7 @@ if __name__ == "__main__":
     for yaml_path in Path(SYMBOL_DIR).glob("*.yml"):
         with yaml_path.open("r") as f:
             current_yaml = yaml.load(f)
-            binary_name = next(iter(current_yaml.keys()))
-            for version in current_yaml[binary_name]["versions"]:
-                if version in ["EU", "NA", "JP"]:
-                    result = process_binary_version(current_yaml, binary_name, version)
+        binary_name = next(iter(current_yaml.keys()))
+        for version in current_yaml[binary_name]["versions"]:
+            if version in ["EU", "NA", "JP"]:
+                process_binary_version(current_yaml, binary_name, version, Path("src", version))

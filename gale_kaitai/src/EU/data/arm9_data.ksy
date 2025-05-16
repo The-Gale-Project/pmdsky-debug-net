@@ -18,6 +18,14 @@ instances:
     pos: 0xccbc
     doc: Highest item ID of the aura bows.
     size: 0x4
+  number_of_items_0:
+    pos: 0xe88c
+    doc: Number of items in the game.
+    type: u4
+  number_of_items_1:
+    pos: 0xe930
+    doc: Number of items in the game.
+    type: u4
   max_money_carried:
     pos: 0xedf8
     doc: Maximum amount of money the player can carry, 99999.
@@ -25,6 +33,22 @@ instances:
   max_money_stored:
     pos: 0x107f8
     doc: Maximum amount of money the player can store in the Duskull Bank, 9999999.
+    type: u4
+  script_vars_values_ptr_0:
+    pos: 0x4b630
+    doc: Hard-coded pointer to SCRIPT_VARS_VALUES.
+    type: u4
+  script_vars_values_ptr_1:
+    pos: 0x4b81c
+    doc: Hard-coded pointer to SCRIPT_VARS_VALUES.
+    type: u4
+  script_vars_values_ptr_2:
+    pos: 0x4c764
+    doc: Hard-coded pointer to SCRIPT_VARS_VALUES.
+    type: u4
+  script_vars_values_ptr_3:
+    pos: 0x4c7bc
+    doc: Hard-coded pointer to SCRIPT_VARS_VALUES.
     type: u4
   max_play_time:
     pos: 0x51188
@@ -36,6 +60,18 @@ instances:
   monster_id_limit:
     pos: 0x54818
     doc: One more than the maximum valid monster ID (0x483).
+    type: u4
+  max_recruitable_team_members_0:
+    pos: 0x555b4
+    doc: 555, appears to be the maximum number of members recruited to an exploration
+      team, at least for the purposes of some checks that need to iterate over all
+      team members.
+    type: u4
+  max_recruitable_team_members_1:
+    pos: 0x559c8
+    doc: 555, appears to be the maximum number of members recruited to an exploration
+      team, at least for the purposes of some checks that need to iterate over all
+      team members.
     type: u4
   cart_removed_img_data:
     pos: 0x92ee4
@@ -153,7 +189,9 @@ instances:
       Each 4-byte entry contains the boost data for (attack, defense, special attack, special defense), 1 byte each, for a specific exclusive item class, indexed according to the stat boost data index list.
 
       type: struct exclusive_item_stat_boost_entry[15]
-    size: 0x3c
+    type: exclusive_item_stat_boost_entry
+    repeat: expr
+    repeat-expr: 15
   exclusive_item_defense_boosts:
     pos: 0x9852d
     doc: EXCLUSIVE_ITEM_STAT_BOOST_DATA, offset by 1
@@ -174,7 +212,9 @@ instances:
       Each entry is 2 bytes, with the first entry corresponding to the first exclusive item (Prism Ruff). The first byte is the exclusive item effect ID, and the second byte is an index into other data tables (related to the more generic stat boosting effects for specific monsters).
 
       type: struct exclusive_item_effect_entry[956]
-    size: 0x778
+    type: exclusive_item_effect_entry
+    repeat: expr
+    repeat-expr: 956
   exclusive_item_stat_boost_data_indexes:
     pos: 0x98569
     doc: EXCLUSIVE_ITEM_EFFECT_DATA, offset by 1
@@ -222,13 +262,121 @@ instances:
     type: s4
     repeat: expr
     repeat-expr: 8
+  parent_menu_default_window_params:
+    pos: 0x9b3cc
+    doc: |-
+      Default window_params for a simple_menu created with CreateParentMenuInternal.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateParentMenuInternal.
+
+      Additionally, width and height are 0, and will be computed in CreateParentMenuInternal.
+    type: window_params
+  simple_menu_default_window_params:
+    pos: 0x9b3dc
+    doc: |-
+      Default window_params for a simple_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateSimpleMenuInternal.
+
+      Additionally, width and height are 0, and will be computed in CreateSimpleMenuInternal.
+    type: window_params
+  advanced_menu_default_window_params:
+    pos: 0x9b3ec
+    doc: |-
+      Default window_params for an advanced_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateAdvancedMenu.
+
+      Additionally, width and height are 0, and will be computed in CreateAdvancedMenu.
+    type: window_params
+  collection_menu_default_window_params:
+    pos: 0x9b3fc
+    doc: |-
+      Default window_params for a collection_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateCollectionMenu.
+
+      Additionally, width and height are 0, and will be computed in CreateCollectionMenu.
+    type: window_params
+  options_menu_default_window_params:
+    pos: 0x9b40c
+    doc: |-
+      Default window_params for an options_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateOptionsMenu.
+
+      Additionally, width and height are 0, and will be computed in CreateOptionsMenu.
+    type: window_params
+  debug_menu_default_window_params:
+    pos: 0x9b448
+    doc: |-
+      Default window_params for a debug_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateDebugMenu.
+
+      Additionally, width and height are 0, and will be computed in CreateDebugMenu.
+    type: window_params
+  scroll_box_default_window_params:
+    pos: 0x9b458
+    doc: Default window_params for a scroll_box.
+    type: window_params
+  dialogue_box_default_window_params:
+    pos: 0x9b468
+    doc: Default window_params for a dialogue_box.
+    type: window_params
+  portrait_box_default_window_params:
+    pos: 0x9b478
+    doc: |-
+      Default window_params for a portrait_box.
+
+      Note that the screen and box type are unset, and are determined in CreatePortraitBox.
+    type: window_params
+  text_box_default_window_params:
+    pos: 0x9b488
+    doc: Default window_params for a text_box.
+    type: window_params
+  area_name_box_default_window_params:
+    pos: 0x9b498
+    doc: |-
+      Default window_params for an area_name_box.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateAreaNameBox.
+
+      Additionally, width and height are 0, and will be computed in CreateAreaNameBox.
+    type: window_params
+  controls_chart_default_window_params:
+    pos: 0x9b4b4
+    doc: Default window_params for a controls_chart.
+    type: window_params
+  alert_box_default_window_params:
+    pos: 0x9b4d0
+    doc: Default window_params for an alert_box.
+    type: window_params
+  advanced_text_box_default_window_params:
+    pos: 0x9b4e0
+    doc: |-
+      Default window_params for an advanced_text_box.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateAdvancedTextBoxInternal.
+    type: window_params
+  team_selection_menu_default_window_params:
+    pos: 0x9b4f0
+    doc: |-
+      Default window_params for a team_selection_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateTeamSelectionMenu.
+
+      Additionally, width and height are 0, and will be computed in CreateTeamSelectionMenu.
+    type: window_params
   partner_talk_kind_table:
     pos: 0x9d268
     doc: |-
       Table of values for the PARTNER_TALK_KIND script variable.
 
       type: struct partner_talk_kind_table_entry[11]
-    size: 0x58
+    type: partner_talk_kind_table_entry
+    repeat: expr
+    repeat-expr: 11
   script_vars_locals:
     pos: 0x9d450
     doc: |-
@@ -237,7 +385,7 @@ instances:
       Each entry has the same structure as an entry in SCRIPT_VARS.
 
       type: struct script_local_var_table
-    size: 0x40
+    type: script_local_var_table
   script_vars:
     pos: 0x9ddf4
     doc: |-
@@ -246,14 +394,16 @@ instances:
       These variables underpin the various ExplorerScript global variables you can use in the SkyTemple SSB debugger.
 
       type: struct script_var_table
-    size: 0x730
+    type: script_var_table
   portrait_layouts:
     pos: 0x9e598
     doc: |-
       All the possible layouts a portrait can be placed in by default.
 
       type: struct portrait_layout[32]
-    size: 0xc0
+    type: portrait_layout
+    repeat: expr
+    repeat-expr: 32
   kaomado_filepath:
     pos: 0x9e658
     doc: |-
@@ -323,7 +473,9 @@ instances:
       See the struct definitions and Frostbyte's dungeon data document for more info.
 
       type: struct dungeon_data_list_entry[180]
-    size: 0x2d0
+    type: dungeon_data_list_entry
+    repeat: expr
+    repeat-expr: 180
   adventure_log_encounters_monster_ids:
     pos: 0x9ebf4
     doc: |-
@@ -359,14 +511,18 @@ instances:
       Note: unverified, ported from Irdkwia's notes
 
       type: struct dungeon_return_status[91]
-    size: 0x16c
+    type: dungeon_return_status
+    repeat: expr
+    repeat-expr: 91
   statuses_full_description_string_ids:
     pos: 0x9ee94
     doc: |-
       Note: unverified, ported from Irdkwia's notes
 
       type: struct status_description[103]
-    size: 0x19c
+    type: status_description
+    repeat: expr
+    repeat-expr: 103
   arm9_unknown_data_na_209eaac:
     pos: 0x9f030
     doc: "Note: unverified, ported from Irdkwia's notes"
@@ -381,7 +537,9 @@ instances:
       Note: unverified, ported from Irdkwia's notes
 
       type: struct mission_floors_forbidden[100]
-    size: 0xc8
+    type: mission_floors_forbidden
+    repeat: expr
+    repeat-expr: 100
   mission_floor_ranks_and_item_lists_2:
     pos: 0x9fd60
     doc: "Note: unverified, ported from Irdkwia's notes"
@@ -405,7 +563,9 @@ instances:
       See the struct definitions and Frostbyte's dungeon data document for more info.
 
       type: struct dungeon_restriction[256]
-    size: 0xc00
+    type: dungeon_restriction
+    repeat: expr
+    repeat-expr: 256
   special_band_stat_boost:
     pos: 0xa1df0
     doc: Stat boost value for the Special Band.
@@ -553,7 +713,9 @@ instances:
       Note: unverified, ported from Irdkwia's notes
 
       type: struct forbidden_forgot_move_entry[3]
-    size: 0x12
+    type: forbidden_forgot_move_entry
+    repeat: expr
+    repeat-expr: 3
   tactics_unlock_level_table:
     pos: 0xa1ec4
     doc: 'type: int16_t[12]'
@@ -606,7 +768,9 @@ instances:
       Note: unverified, ported from Irdkwia's notes
 
       type: struct version_exclusive_monster[23]
-    size: 0x5c
+    type: version_exclusive_monster
+    repeat: expr
+    repeat-expr: 23
   iq_skill_restrictions:
     pos: 0xa1fe0
     doc: |-
@@ -707,10 +871,14 @@ instances:
       See the struct definitions and Frostbyte's dungeon data document for more info.
 
       type: struct guest_monster[18]
-    size: 0x288
+    type: guest_monster
+    repeat: expr
+    repeat-expr: 18
   rank_up_table:
     pos: 0xa30c8
-    size: 0xd0
+    type: rankup_table_entry
+    repeat: expr
+    repeat-expr: 13
   ds_download_teams:
     pos: 0xa3198
     doc: |-
@@ -734,7 +902,9 @@ instances:
   monster_sprite_data:
     pos: 0xa332c
     doc: Contains information about the sprite size and sprite file size of each monster
-    size: 0x4b0
+    type: monster_sprite_data_entry
+    repeat: expr
+    repeat-expr: 600
   remote_strings:
     pos: 0xa4140
     doc: "Note: unverified, ported from Irdkwia's notes"
@@ -775,7 +945,9 @@ instances:
       Irdkwia's notes: SpecialDungeonMissions
 
       type: struct dungeon_unlock_entry[3]
-    size: 0x6
+    type: dungeon_unlock_entry
+    repeat: expr
+    repeat-expr: 3
   no_send_item_table:
     pos: 0xa42b2
     doc: |-
@@ -856,6 +1028,7 @@ instances:
       Table of levels for the script engine, in which scenes can take place. There are a version-dependent number of 12-byte entries.
 
       type: struct script_level[length / 12]
+    type: events_entries
     size: 0x1584
   arm9_unknown_table_na_20a68bc:
     pos: 0xa715c
@@ -881,67 +1054,95 @@ instances:
       Table of entities for the script engine, which can move around and do things within a scene. There are 386 12-byte entries.
 
       type: struct script_entity[386]
-    size: 0x1218
+    type: script_entity
+    repeat: expr
+    repeat-expr: 386
   job_window_params_1:
     pos: 0xa9ab8
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   job_menu_items_1:
     pos: 0xa9ac8
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x20
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 4
   job_menu_items_2:
     pos: 0xa9ae8
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x20
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 4
   job_menu_items_3:
     pos: 0xa9b58
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_4:
     pos: 0xa9b70
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_5:
     pos: 0xa9b88
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_6:
     pos: 0xa9ba0
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_7:
     pos: 0xa9bb8
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_8:
     pos: 0xa9bd0
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_9:
     pos: 0xa9be8
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_10:
     pos: 0xa9c00
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_11:
     pos: 0xa9c18
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   job_menu_items_12:
     pos: 0xa9c30
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x20
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 4
   job_menu_items_13:
     pos: 0xa9c50
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x20
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 4
   job_window_params_2:
     pos: 0xa9c70
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   dungeon_swap_id_table:
     pos: 0xa9c80
     doc: |-
@@ -959,10 +1160,12 @@ instances:
       See the struct definitions and Frostbyte's dungeon data document for more info.
 
       type: struct map_marker[310]
-    size: 0x9b0
+    type: map_marker
+    repeat: expr
+    repeat-expr: 310
   lfo_output_voice_update_flags:
     pos: 0xaa840
-    size: 0x10
+    type: dse_voice_update_flags
   trig_table:
     pos: 0xaa850
     doc: |-
@@ -971,7 +1174,9 @@ instances:
       More precisely, the trig_values entry at index i corresponds to {sin(i * 2π/4096), cos(i * 2π/4096)} (each division is ~1/10 of a degree). Values are stored as signed fixed-point numbers with 12 fraction bits.
 
       type: struct trig_values[4096]
-    size: 0x4974
+    type: trig_values
+    repeat: expr
+    repeat-expr: 4096
   fx_atan_idx_table:
     pos: 0xae850
     doc: |-
@@ -1004,7 +1209,7 @@ instances:
       Functions to get the desired memory arena for allocating and freeing heap memory.
 
       type: struct mem_arena_getters
-    size: 0x8
+    type: mem_arena_getters
   prng_sequence_num:
     pos: 0xaf7cc
     doc: '[Runtime] The current PRNG sequence number for the general-purpose PRNG.
@@ -1124,7 +1329,7 @@ instances:
       The (seemingly) unique instance render_3d_global in the game
 
       type: struct render_3d_global
-    size: 0x44
+    type: render_3d_global
   render_3d_functions_64:
     pos: 0xb0584
     doc: |-
@@ -1292,9 +1497,361 @@ instances:
     pos: 0xb34dc
     type: u4
 types:
+  exclusive_item_stat_boost_entry:
+  - id: atk
+    type: s1
+  - id: def
+    type: s1
+  - id: sp_atk
+    type: s1
+  - id: sp_def
+    type: s1
+  exclusive_item_effect_entry:
+  - id: effect_id
+    type: exclusive_item_effect_id_8
+  - id: foreign_idx
+    type: u1
+  window_params:
+  - id: update
+    type: update_window_fn_t
+  - id: x_offset
+    type: u1
+  - id: y_offset
+    type: u1
+  - id: width
+    type: u1
+  - id: height
+    type: u1
+  - id: screen
+    type: screen_8
+  - id: box_type
+    type: box_type_8
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  partner_talk_kind_table_entry:
+  - id: talk_kind
+    type: talk_kind
+  - id: id
+    type: monster_id
+  script_local_var_table: []
+  script_var_table: []
+  portrait_layout:
+  - id: offset_x
+    type: s2
+  - id: offset_y
+    type: s2
+  - id: try_flip
+    type: bool
+  - id: _padding
+    type: u1
+  dungeon_data_list_entry:
+  - id: n_floors
+    type: u1
+  - id: dungeon_data_index_mappa_s
+    type: u1
+  - id: n_preceding_floors_group
+    type: u1
+  - id: n_total_floors_group
+    type: u1
+  dungeon_return_status:
+  - id: flag
+    type: bool
+  - id: _padding
+    type: u1
+  - id: string_id
+    type: s2
+  status_description:
+  - id: name_str_id
+    type: s2
+  - id: desc_str_id
+    type: s2
+  mission_floors_forbidden:
+  - id: field_0x0
+    type: u1
+  - id: field_0x1
+    type: u1
+  dungeon_restriction:
+  - id: unused
+    type: u2
+  - id: max_rescue_attempts
+    type: u1
+  - id: max_items_allowed
+    type: u1
+  - id: max_party_size
+    type: u1
+  - id: field_0x7
+    type: u1
+  - id: turn_limit_per_floor
+    type: u2
+  - id: random_movement_chance
+    type: s2
+  forbidden_forgot_move_entry:
+  - id: monster_id
+    type: monster_id_16
+  - id: origin_id
+    type: dungeon_id_16
+  - id: move_id
+    type: move_id_16
+  version_exclusive_monster:
+  - id: id
+    type: monster_id_16
+  - id: in_eot
+    type: bool
+  - id: in_eod
+    type: bool
+  guest_monster:
+  - id: id
+    type: monster_id_16
+  - id: joined_at
+    type: dungeon_id_8
+  - id: joined_at_floor
+    type: u1
+  - id: max_hp
+    type: s2
+  - id: level
+    type: u1
+  - id: field_0x13
+    type: u1
+  - id: iq
+    type: s2
+  - id: atk
+    type: u1
+  - id: field_0x17
+    type: u1
+  - id: sp_atk
+    type: u1
+  - id: field_0x19
+    type: u1
+  - id: def
+    type: u1
+  - id: field_0x1b
+    type: u1
+  - id: sp_def
+    type: u1
+  - id: field_0x1d
+    type: u1
+  - id: field_0x1e
+    type: u1
+  - id: field_0x1f
+    type: u1
+  - id: exp
+    type: s4
+  rankup_table_entry:
+  - id: field_0x0
+    type: u1
+  - id: field_0x1
+    type: u1
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: field_0x4
+    type: s4
+  - id: field_0x8
+    type: s4
+  - id: field_0xc
+    type: s2
+  - id: field_0xe
+    type: u1
+  - id: field_0xf
+    type: u1
+  monster_sprite_data_entry:
+  - id: sprite_size
+    type: u1
+  - id: sprite_file_size
+    type: u1
+  dungeon_unlock_entry:
+  - id: dungeon_id
+    type: dungeon_id_8
+  - id: scenario_balance_min
+    type: u1
+  script_level:
+  - id: mapty
+    type: u2
+  - id: field_0x2
+    type: u2
+  - id: mapid
+    type: u2
+  - id: weather_id
+    type: u2
+  script_entity:
+  - id: type
+    type: u2
+  - id: entid
+    type: u2
+  - id: field_0x8
+    type: u2
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  simple_menu_id_item:
+  - id: string_id
+    type: u2
+  - id: _padding
+    type: u2
+  - id: result_value
+    type: s4
+  map_marker:
+  - id: map_id
+    type: u2
+  - id: reference_id
+    type: s2
+  - id: pos
+    type: position
+  dse_voice_update_flags: []
+  trig_values:
+  - id: sin
+    type: fx16_12
+  - id: cos
+    type: fx16_12
+  mem_arena_getters:
+  - id: get_alloc_arena
+    type: get_alloc_arena_fn_t
+  - id: get_free_arena
+    type: get_free_arena_fn_t
+  render_3d_global:
+  - id: current_index
+    type: s2
+  - id: max_index
+    type: s2
+  - id: palette_base_addr
+    type: s4
+  - id: texture_vram_offset
+    type: s4
+  - id: field4_0xc
+    type: u1
+  - id: field5_0xd
+    type: u1
+  - id: field6_0xe
+    type: u1
+  - id: field7_0xf
+    type: u1
+  - id: field8_0x10
+    type: u1
+  - id: field9_0x11
+    type: u1
+  - id: field10_0x12
+    type: u1
+  - id: field11_0x13
+    type: u1
+  - id: field12_0x14
+    type: u1
+  - id: field13_0x15
+    type: u1
+  - id: field14_0x16
+    type: u1
+  - id: field15_0x17
+    type: u1
+  - id: field16_0x18
+    type: u1
+  - id: field17_0x19
+    type: u1
+  - id: field18_0x1a
+    type: u1
+  - id: field19_0x1b
+    type: u1
+  - id: field20_0x1c
+    type: u1
+  - id: field21_0x1d
+    type: u1
+  - id: field22_0x1e
+    type: u1
+  - id: field23_0x1f
+    type: u1
+  - id: field24_0x20
+    type: u1
+  - id: field25_0x21
+    type: u1
+  - id: field26_0x22
+    type: u1
+  - id: field27_0x23
+    type: u1
+  - id: field28_0x24
+    type: u1
+  - id: field29_0x25
+    type: u1
+  - id: field30_0x26
+    type: u1
+  - id: field31_0x27
+    type: u1
+  - id: field32_0x28
+    type: u1
+  - id: field33_0x29
+    type: u1
+  - id: field34_0x2a
+    type: u1
+  - id: field35_0x2b
+    type: u1
+  - id: field36_0x2c
+    type: u1
+  - id: field37_0x2d
+    type: u1
+  - id: field38_0x2e
+    type: u1
+  - id: field39_0x2f
+    type: u1
+  - id: field40_0x30
+    type: u1
+  - id: field41_0x31
+    type: u1
+  - id: field42_0x32
+    type: u1
+  - id: field43_0x33
+    type: u1
+  - id: field44_0x34
+    type: u1
+  - id: field45_0x35
+    type: u1
+  - id: field46_0x36
+    type: u1
+  - id: field47_0x37
+    type: u1
+  - id: field48_0x38
+    type: u1
+  - id: field49_0x39
+    type: u1
+  - id: field50_0x3a
+    type: u1
+  - id: field51_0x3b
+    type: u1
+  - id: field52_0x3c
+    type: u1
+  - id: field53_0x3d
+    type: u1
+  - id: field54_0x3e
+    type: u1
+  - id: field55_0x3f
+    type: u1
+  mem_alloc_table:
+  - id: n_arenas
+    type: u4
+  - id: default_arena
+    type: mem_arena
+  mem_arena:
+  - id: content_flags
+    type: u4
+  - id: n_blocks
+    type: u4
+  - id: max_blocks
+    type: u4
+  - id: len
+    type: u4
+  mem_block:
+  - id: available
+    type: u4
+  - id: used
+    type: u4
   cart_removed_img_data_entries:
     seq:
     - id: entries
       type: u1
+      repeat: eos
+  events_entries:
+    seq:
+    - id: entries
+      type: script_level
       repeat: eos
 enums: {}

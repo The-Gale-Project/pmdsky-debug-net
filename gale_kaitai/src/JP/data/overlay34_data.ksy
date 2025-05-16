@@ -4,9 +4,20 @@ meta:
 instances:
   start_menu_items_confirm:
     pos: 0xd48
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   dungeon_debug_menu_items:
     pos: 0xd70
-    size: 0x28
-types: {}
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 5
+types:
+  simple_menu_id_item:
+  - id: string_id
+    type: u2
+  - id: _padding
+    type: u2
+  - id: result_value
+    type: s4
 enums: {}

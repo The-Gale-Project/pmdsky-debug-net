@@ -2,6 +2,15 @@ meta:
   id: overlay10_data
   endian: le
 instances:
+  inventory_menu_default_window_params:
+    pos: 0x792c
+    doc: |-
+      Default window_params for an inventory_menu.
+
+      Note that x_offset and y_offset refer to the right and bottom edges, since they will be paired with the x_offset_end and y_offset_end window flags in CreateInventoryMenu.
+
+      Additionally, width and height are 0, and will be computed in CreateInventoryMenu.
+    type: window_params
   first_dungeon_with_monster_house_traps:
     pos: 0x79a4
     doc: |-
@@ -821,7 +830,9 @@ instances:
       Maps each weather type (by index, see enum weather_id) to the corresponding Castform type and form.
 
       type: struct castform_weather_attributes[8]
-    size: 0x30
+    type: castform_weather_attributes
+    repeat: expr
+    repeat-expr: 8
   bad_poison_damage_table:
     pos: 0x8234
     doc: Table for how much damage each tick of badly poisoned should deal. The table
@@ -829,6 +840,15 @@ instances:
     type: s2
     repeat: expr
     repeat-expr: 30
+  type_matchup_combinator_table:
+    pos: 0x82ac
+    doc: |-
+      Table of type matchup combinations.
+
+      Each row corresponds to a single type matchup that results from combining two individual type matchups together. For example, combining MATCHUP_NOT_VERY_EFFECTIVE with MATCHUP_SUPER_EFFECTIVE results in MATCHUP_NEUTRAL.
+
+      type: struct type_matchup_combinator_table
+    type: type_matchup_combinator_table
   offensive_stat_stage_multipliers:
     pos: 0x8330
     doc: Table of multipliers for offensive stats (attack/special attack) for each
@@ -849,7 +869,9 @@ instances:
       Maps enum nature_power_variant to the associated move ID and effect handler.
 
       type: struct wildcard_move_desc[15]
-    size: 0x78
+    type: wildcard_move_desc
+    repeat: expr
+    repeat-expr: 15
   apples_and_berries_item_ids:
     pos: 0x8450
     doc: |-
@@ -874,7 +896,9 @@ instances:
       Any item not listed in this table explicitly will be Normal type with a base power of 1 when used with Natural Gift.
 
       type: struct natural_gift_item_info[34]
-    size: 0xcc
+    type: natural_gift_item_info
+    repeat: expr
+    repeat-expr: 34
   random_music_id_table:
     pos: 0x8794
     doc: |-
@@ -938,7 +962,7 @@ instances:
       Each row corresponds to the type matchups of a specific attack type, with each entry within the row specifying the type's effectiveness against a target type.
 
       type: struct type_matchup_table
-    size: 0x288
+    type: type_matchup_table
   fixed_room_monster_spawn_stats_table:
     pos: 0x8ed0
     doc: |-
@@ -947,18 +971,24 @@ instances:
       This is an array of 99 12-byte entries containing stat spreads for one monster entry each.
 
       type: struct fixed_room_monster_spawn_stats_entry[99]
-    size: 0x4a4
+    type: fixed_room_monster_spawn_stats_entry
+    repeat: expr
+    repeat-expr: 99
   metronome_table:
     pos: 0x9374
     doc: |-
       Something to do with the moves that Metronome can turn into.
 
       type: struct wildcard_move_desc[168]
-    size: 0x540
+    type: wildcard_move_desc
+    repeat: expr
+    repeat-expr: 168
   tileset_properties:
     pos: 0x98b4
     doc: 'type: struct tileset_property[199]'
-    size: 0x954
+    type: tileset_property
+    repeat: expr
+    repeat-expr: 199
   fixed_room_properties_table:
     pos: 0xa208
     doc: |-
@@ -969,38 +999,228 @@ instances:
       See the struct definitions and Frostbyte's dungeon data document for more info.
 
       type: struct fixed_room_properties_entry[256]
-    size: 0xc00
+    type: fixed_room_properties_entry
+    repeat: expr
+    repeat-expr: 256
   trap_animation_info:
     pos: 0xafe8
     doc: |-
       Note: unverified, ported from Irdkwia's notes
 
       type: struct trap_animation[26]
-    size: 0x34
+    type: trap_animation
+    repeat: expr
+    repeat-expr: 26
   item_animation_info:
     pos: 0xb01c
     doc: |-
       Note: unverified, ported from Irdkwia's notes
 
       type: struct item_animation[1400]
-    size: 0x15e0
+    type: item_animation
+    repeat: expr
+    repeat-expr: 1400
   move_animation_info:
     pos: 0xc5fc
     doc: 'type: struct move_animation[563]'
-    size: 0x34c8
+    type: move_animation
+    repeat: expr
+    repeat-expr: 563
   effect_animation_info:
     pos: 0xfac4
     doc: |-
       Note: unverified, ported from Irdkwia's notes
 
       type: struct effect_animation[700]
-    size: 0x4c90
+    type: effect_animation
+    repeat: expr
+    repeat-expr: 700
   special_monster_move_animation_info:
     pos: 0x14754
     doc: |-
       Note: unverified, ported from Irdkwia's notes
 
       type: struct special_monster_move_animation[7422]
-    size: 0xadf4
-types: {}
+    type: special_monster_move_animation
+    repeat: expr
+    repeat-expr: 7422
+types:
+  window_params:
+  - id: update
+    type: update_window_fn_t
+  - id: x_offset
+    type: u1
+  - id: y_offset
+    type: u1
+  - id: width
+    type: u1
+  - id: height
+    type: u1
+  - id: screen
+    type: screen_8
+  - id: box_type
+    type: box_type_8
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  castform_weather_attributes:
+  - id: castform_type
+    type: type_id_8
+  - id: _padding
+    type: u1
+  - id: castform_male_id
+    type: monster_id_16
+  - id: castform_female_id
+    type: monster_id_16
+  type_matchup_combinator_table: []
+  wildcard_move_desc:
+  - id: move_id
+    type: move_id_16
+  - id: _padding
+    type: u2
+  - id: do_move
+    type: move_effect_fn_t
+  natural_gift_item_info:
+  - id: item_id
+    type: item_id_16
+  - id: type_id
+    type: type_id_8
+  - id: _padding
+    type: u1
+  - id: base_power_boost
+    type: s2
+  type_matchup_table: []
+  fixed_room_monster_spawn_stats_entry:
+  - id: level
+    type: u2
+  - id: hp
+    type: u2
+  - id: exp_yield
+    type: s2
+  - id: atk
+    type: u1
+  - id: sp_atk
+    type: u1
+  - id: def
+    type: u1
+  - id: sp_def
+    type: u1
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  tileset_property:
+  - id: field_0x0
+    type: s4
+  - id: field_0x4
+    type: u1
+  - id: field_0x5
+    type: u1
+  - id: field_0x6
+    type: u1
+  - id: _padding
+    type: u1
+  - id: nature_power_variant
+    type: nature_power_variant_16
+  - id: field_0xa
+    type: u1
+  - id: is_water_tileset
+    type: bool
+  fixed_room_properties_entry:
+  - id: music
+    type: music_id_16
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: illuminated
+    type: bool
+  - id: enable_lategame_traps
+    type: bool
+  - id: moves_enabled
+    type: bool
+  - id: orbs_allowed
+    type: bool
+  - id: tile_jumps_allowed
+    type: bool
+  - id: trawl_orbs_allowed
+    type: bool
+  - id: exit_after_enemies_defeated
+    type: bool
+  - id: field_0xb
+    type: u1
+  trap_animation:
+  - id: field_0x0
+    type: s2
+  item_animation:
+  - id: field_0x0
+    type: s2
+  - id: field_0x2
+    type: s2
+  move_animation:
+  - id: field_0x0
+    type: s2
+  - id: field_0x2
+    type: s2
+  - id: field_0x4
+    type: s2
+  - id: field_0x6
+    type: s2
+  - id: field_0x8
+    type: u1
+  - id: field_0x9
+    type: u1
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  - id: field_0xc
+    type: u1
+  - id: field_0xd
+    type: u1
+  - id: field_0xe
+    type: u1
+  - id: field_0xf
+    type: u1
+  - id: field_0x10
+    type: u1
+  - id: field_0x11
+    type: s1
+  - id: field_0x12
+    type: u2
+  - id: field_0x14
+    type: s2
+  - id: field_0x16
+    type: u2
+  effect_animation:
+  - id: field_0x0
+    type: s4
+  - id: file_index
+    type: s4
+  - id: field_0x8
+    type: s4
+  - id: animation_index
+    type: s4
+  - id: se_id
+    type: s4
+  - id: field_0x14
+    type: s4
+  - id: field_0x18
+    type: u1
+  - id: field_0x19
+    type: s1
+  - id: is_non_blocking
+    type: u1
+  - id: unk_repeat
+    type: u1
+  special_monster_move_animation:
+  - id: field_0x0
+    type: s2
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: s1
+  - id: field_0x4
+    type: s2
 enums: {}

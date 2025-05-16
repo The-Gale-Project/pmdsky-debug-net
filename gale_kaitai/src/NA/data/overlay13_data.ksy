@@ -21,23 +21,25 @@ instances:
   quiz_window_params_1:
     pos: 0x1ef4
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   quiz_window_params_2:
     pos: 0x1f04
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   quiz_window_params_3:
     pos: 0x1f14
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   quiz_window_params_4:
     pos: 0x1f24
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   quiz_menu_items_1:
     pos: 0x1f34
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x18
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 3
   starters_partner_ids:
     pos: 0x1f4c
     doc: 'type: struct monster_id_16[21]'
@@ -74,7 +76,9 @@ instances:
       0x10 * (174 answers?)
 
       Note: unverified, ported from Irdkwia's notes
-    size: 0xae0
+    type: quiz_answer_points_entry
+    repeat: expr
+    repeat-expr: 174
   overlay13_reserved_space:
     pos: 0x2d50
     doc: "Note: unverified, ported from Irdkwia's notes"
@@ -99,15 +103,17 @@ instances:
   quiz_window_params_5:
     pos: 0x2d6c
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   quiz_window_params_6:
     pos: 0x2d7c
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x10
+    type: window_params
   quiz_debug_menu_items:
     pos: 0x2d8c
     doc: "Note: unverified, ported from Irdkwia's notes"
-    size: 0x48
+    type: simple_menu_id_item
+    repeat: expr
+    repeat-expr: 9
   overlay13_unknown_struct_na_238cf14:
     pos: 0x2dd4
     doc: "Note: unverified, ported from Irdkwia's notes"
@@ -121,5 +127,64 @@ instances:
     type: u2
     repeat: expr
     repeat-expr: 66
-types: {}
+types:
+  window_params:
+  - id: update
+    type: update_window_fn_t
+  - id: x_offset
+    type: u1
+  - id: y_offset
+    type: u1
+  - id: width
+    type: u1
+  - id: height
+    type: u1
+  - id: screen
+    type: screen_8
+  - id: box_type
+    type: box_type_8
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  simple_menu_id_item:
+  - id: string_id
+    type: u2
+  - id: _padding
+    type: u2
+  - id: result_value
+    type: s4
+  quiz_answer_points_entry:
+  - id: field_0x0
+    type: u1
+  - id: field_0x1
+    type: u1
+  - id: field_0x2
+    type: u1
+  - id: field_0x3
+    type: u1
+  - id: field_0x4
+    type: u1
+  - id: field_0x5
+    type: u1
+  - id: field_0x6
+    type: u1
+  - id: field_0x7
+    type: u1
+  - id: field_0x8
+    type: u1
+  - id: field_0x9
+    type: u1
+  - id: field_0xa
+    type: u1
+  - id: field_0xb
+    type: u1
+  - id: field_0xc
+    type: u1
+  - id: field_0xd
+    type: u1
+  - id: field_0xe
+    type: u1
+  - id: field_0xf
+    type: u1
 enums: {}
