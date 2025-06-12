@@ -14,7 +14,7 @@
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.rulers": [
             120 // Recommended line length for *.py files.
-        ]
+        ],
     },
     "cSpell.words": [
         "bitflags",
@@ -25,6 +25,6 @@
         "Yamls"
     ],
     "cSpell.enabled": false,
-    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.typeCheckingMode": "standard",
     "python.analysis.autoImportCompletions": true
 }

@@ -1,3 +1,47 @@
 version: "3"
 
 tasks:
+  all:
+    cmds:
+      - task: gen-ksy
+      - task: gen-eu-cs
+      - task: gen-na-cs
+      - task: gen-jp-cs
+
+  clean:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - for: ["EU", "JP", "NA"]
+        cmd: rm -rf {{.USER_WORKING_DIR}}/gale_kaitai/{{.ITEM}}
+      - for: ["EU", "JP", "NA"]
+        cmd: rm -rf {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/{{.ITEM}}
+
+  gen-ksy:
+    dir: "{{.USER_WORKING_DIR}}/generator"
+    cmds:
+      - python gen_kaitai.py
+
+  gen-eu-cs:
+    dir: "{{.USER_WORKING_DIR}}"
+    sources:
+      - "{{.USER_WORKING_DIR}}/gale_kaitai/EU/*.ksy"
+    cmds:
+      - cmd: mkdir -p {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/EU
+      - for: sources
+        cmd: kaitai-struct-compiler -t csharp --outdir {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/EU --dotnet-namespace Gale.EOS.Kaitai.EU {{.ITEM}}
+
+  gen-jp-cs:
+    dir: "{{.USER_WORKING_DIR}}"
+    sources:
+      - "{{.USER_WORKING_DIR}}/gale_kaitai/JP/*.ksy"
+    cmds:
+      - for: sources
+        cmd: kaitai-struct-compiler -t csharp --outdir {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/JP --dotnet-namespace Gale.EOS.Kaitai.JP {{.ITEM}}
+
+  gen-na-cs:
+    dir: "{{.USER_WORKING_DIR}}"
+    sources:
+      - "{{.USER_WORKING_DIR}}/gale_kaitai/NA/*.ksy"
+    cmds:
+      - for: sources
+        cmd: kaitai-struct-compiler -t csharp --outdir {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/NA --dotnet-namespace Gale.EOS.Kaitai.NA {{.ITEM}}
