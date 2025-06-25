@@ -1,5 +1,6 @@
 from ruamel.yaml.scalarint import HexInt
-from util import to_snake_case
+
+from parsing.util import to_snake_case
 
 
 class FunctionParser:
@@ -36,6 +37,10 @@ class FunctionParser:
                 continue
 
             function_name = to_snake_case(function["name"]).strip("_")
+
+            # This collides with the C# built-in method GetType().
+            if function_name == "get_type":
+                function_name = "get_type_func"
 
             if isinstance(function["address"][self.version], list):
                 pass

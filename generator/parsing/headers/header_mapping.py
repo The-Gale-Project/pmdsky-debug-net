@@ -24,7 +24,8 @@ from pycparser.c_ast import (
     UnaryOp,
     Union,
 )
-from util import C_TYPE_MAP, HEADER_DIR, OUTPUT_DIR, normalize_name, yaml
+
+from parsing.util import C_TYPE_MAP, HEADER_DIR, OUTPUT_DIR, normalize_name, yaml
 
 
 class HeaderMapping:
@@ -172,6 +173,13 @@ class HeaderMapping:
         return normalized_name
 
     def _map_extern(self, symbol_name: str, type_name: str) -> str:
+        # Check to make sure this type name exists.
+        if type_name not in self.type_name_map.values():
+            self._print_err(
+                f"Attempted to map symbol to unknown type '{type_name}'",
+            )
+            raise ValueError
+
         # Check if we already fixed the name.
         if symbol_name in self.extern_name_map:
             normalized_name = self.extern_name_map[symbol_name]
@@ -190,19 +198,10 @@ class HeaderMapping:
             # Store the fixed name.
             self.extern_name_map[symbol_name] = normalized_name
 
-        # Try to retrieve the kaitai subtype mapping.
-        normalized_type_name = self.type_name_map.get(type_name)
-
-        if not normalized_type_name:
-            self._print_err(
-                f"Failed to find mapping for type name '{type_name}'",
-            )
-            raise ValueError
-
         # Return here if we already processed this symbol prior.
         if normalized_name in self.extern_map:
             # But if the type name is different, we should throw an error.
-            if self.extern_map[normalized_name] != normalized_type_name:
+            if self.extern_map[normalized_name] != type_name:
                 self._print_err(
                     "Found different type",
                     type_name,
@@ -211,11 +210,11 @@ class HeaderMapping:
                     "this should not happen!",
                 )
                 raise ValueError
-            return normalized_type_name
+            return type_name
 
         # Map the symbol to the subtype.
-        self.extern_map[normalized_name] = normalized_type_name
-        return normalized_type_name
+        self.extern_map[normalized_name] = type_name
+        return type_name
 
     def _read_typedef(self, typedef: Typedef) -> str:
         if isinstance(typedef.type, TypeDecl):
@@ -233,15 +232,14 @@ class HeaderMapping:
         type_decl: TypeDecl,
     ) -> str:
         if isinstance(type_decl.type, IdentifierType):
-            return self._process_identifier_type(type_decl.type)
+            proxied_type = self.type_name_map.get(type_decl.declname)
+            return proxied_type or self._process_identifier_type(type_decl.type)
         if isinstance(type_decl.type, Enum):
             if not type_decl.type.values:
                 return self.type_name_map[type_decl.type.name]
             return self._read_enum(type_decl.type)
-        if isinstance(type_decl.type, Struct):
-            return self._read_struct(type_decl.type)
-        if isinstance(type_decl.type, Union):
-            return self._read_union(type_decl.type)
+        if isinstance(type_decl.type, Struct | Union):
+            return self._read_struct_or_union(type_decl.type)
 
         # If we got here, we aren't aware of this typedecl.
         self._print_err(
@@ -266,17 +264,23 @@ class HeaderMapping:
     def _process_pointer(self) -> str:
         return "pointer"
 
-    def _read_array(self, array: ArrayDecl, prefix: str) -> str:
+    def _read_array(self, array: ArrayDecl, prefix: str) -> str:  # noqa: C901, PLR0912
         current_type = array
-        array_dims = []
+        array_dims: list[ArrayDecl] = []
         while isinstance(current_type, ArrayDecl):
             array_dims.insert(0, current_type)
             current_type = current_type.type
 
+        if len(array_dims) == 0:
+            self._print_err(
+                "Found array type with zero dimensions.",
+            )
+            raise ValueError
+
         if isinstance(current_type, TypeDecl):
             if isinstance(current_type.type, IdentifierType):
                 identifier_name = " ".join(current_type.type.names)
-            elif isinstance(current_type.type, Struct):
+            elif isinstance(current_type.type, (Struct, Enum)):
                 identifier_name = str(current_type.type.name)
             else:
                 self._print_err(
@@ -306,15 +310,44 @@ class HeaderMapping:
                 "id": normalized_array_name,
                 "endian": "le",
                 "bit-endian": "le",
-                "imports": self.import_map[type_name] or [],
             },
             "seq": [],
             "types": {},
         }
 
-        for depth, array in enumerate(array_dims):
-            # TODO
-            pass
+        needed_import = self.import_map.get(type_name)
+        if needed_import:
+            array_subtype["meta"]["imports"] = [needed_import]
+
+        last_array_entry_id = None
+        for depth, array_dimension in enumerate(array_dims):
+            array_entry_id = f"{normalized_array_name}_dim_{depth}"
+            entry_type: dict = {
+                "id": "entries",
+                "type": last_array_entry_id or type_name,
+            }
+            if isinstance(array_dimension.dim, Constant):
+                entry_type["repeat"] = "expr"
+                entry_type["repeat-expr"] = self._process_constant(array_dimension.dim)
+            elif not array_dimension.dim:
+                entry_type["repeat"] = "eos"
+            else:
+                self._print_err(
+                    "Failed to read array dimensions.",
+                )
+                raise TypeError
+
+            array_subtype["types"][array_entry_id] = {
+                "seq": [entry_type],
+            }
+            last_array_entry_id = array_entry_id
+
+        array_subtype["seq"] = [
+            {
+                "id": "entries",
+                "type": last_array_entry_id,
+            },
+        ]
 
         return self._create_type(array_name, array_subtype)
 
@@ -343,8 +376,10 @@ class HeaderMapping:
             if bitsize != int_bitsize:
                 new_enum_name += f"_{bitsize}"
 
-            if normalize_name(new_enum_name) in self._enum_cache:
-                return normalize_name(new_enum_name)
+            normalized_new_enum_name = normalize_name(new_enum_name)
+
+            if normalized_new_enum_name in self._enum_cache:
+                return normalized_new_enum_name
 
             if enum.name not in self.type_name_map or self.type_name_map[enum.name] not in self._enum_cache:
                 self._print_err(
@@ -353,7 +388,7 @@ class HeaderMapping:
                 raise ValueError
 
             parent_subtype = self._enum_cache[self.type_name_map[enum.name]]
-            enum_values = parent_subtype["enums"][self.type_name_map[enum.name]]
+            enum_values = parent_subtype["enums"][self.type_name_map[enum.name] + "_enum"]
         elif isinstance(enum.values, EnumeratorList):
             docstring = f"Holds the data for the enum {enum.name}."
             enum_values = {}
@@ -384,13 +419,13 @@ class HeaderMapping:
             },
             "seq": [
                 {
-                    "id": normalized_enum_name,
+                    "id": normalized_enum_name + "_value",
                     "type": f"b{bitsize}",
-                    "enum": normalized_enum_name,
+                    "enum": normalized_enum_name + "_enum",
                 },
             ],
             "enums": {
-                normalized_enum_name: enum_values,
+                normalized_enum_name + "_enum": enum_values,
             },
         }
 
@@ -403,7 +438,7 @@ class HeaderMapping:
         self,
         declaration: Decl,
         bitsize: int,
-    ) -> dict:
+    ) -> str:
         current_type = declaration.type
 
         if not isinstance(current_type, TypeDecl):
@@ -429,30 +464,27 @@ class HeaderMapping:
                 raise ValueError
             enum_type = self._read_enum(current_type.type, bitsize)
 
-        return {
-            "id": normalize_name(declaration.name),
-            "type": enum_type or f"b{bitsize}",
-        }
+        return enum_type or f"b{bitsize}"
 
-    def _read_struct(self, struct: Struct) -> str:  # noqa: C901, PLR0912
-        decls = struct.decls
+    def _read_struct_or_union(self, target: Struct | Union) -> str:  # noqa: C901, PLR0912
+        decls = target.decls
         if not decls:
-            if struct.name not in self.type_name_map:
-                self._undefined_symbols.add(struct.name)
-                return struct.name
+            if target.name not in self.type_name_map:
+                self._undefined_symbols.add(target.name)
+                return target.name
 
-            return self.type_name_map[struct.name]
+            return self.type_name_map[target.name]
 
         if not isinstance(decls, list):
             self._print_err(
-                "Failed to read struct, unknown type within the declarations.",
+                "Failed to read struct or union, unknown type within the declarations.",
             )
             raise TypeError
 
         struct_subtype = {
-            "doc": f"Represents a struct {struct.name} defined within pmdsky.",
+            "doc": f"Represents a struct or union {target.name} defined within pmdsky-debug.",
             "meta": {
-                "id": normalize_name(struct.name),
+                "id": normalize_name(target.name),
                 "endian": "le",
                 "bit-endian": "le",
                 "imports": [],
@@ -460,7 +492,6 @@ class HeaderMapping:
             "seq": [],
         }
 
-        # We need to be able to skip a range of decls.
         for declaration in decls:
             if not isinstance(declaration, Decl):
                 self._print_err(
@@ -478,32 +509,35 @@ class HeaderMapping:
             if declaration.bitsize:
                 bitsize = self._process_constant(declaration.bitsize)
 
-            if bitsize:
-                entry = self._process_bitsized_decl(declaration, bitsize)
-                struct_subtype["seq"].append(entry)
-                continue
-
             entry = {
                 "id": normalize_name(declaration.name),
             }
 
             declaration_type = declaration.type
 
-            if isinstance(declaration_type, TypeDecl):
+            if bitsize:
+                type_name = self._process_bitsized_decl(declaration, bitsize)
+            elif isinstance(declaration_type, TypeDecl):
                 type_name = self._read_type_decl(declaration_type)
             elif isinstance(declaration_type, ArrayDecl):
-                type_name = self._read_array(declaration_type, declaration.name)
+                type_name = self._read_array(declaration_type, f"{target.name}_{declaration.name}")
             elif isinstance(declaration_type, Enum):
                 type_name = self._read_enum(declaration_type, bitsize)
             elif isinstance(declaration_type, PtrDecl):
                 type_name = "pointer"
             else:
                 self._print_err(
-                    "Failed to read unknown type declaration on struct.",
+                    f"Failed to read unknown type declaration on struct or union {target.name}.",
                 )
                 raise TypeError
 
-            import_name = self.import_map[type_name]
+            if type_name not in self.import_map and not re.match(r"b[0-9]+", type_name):
+                self._print_err(
+                    f"Failed to import type '{type_name}' for struct or union {target.name}",
+                )
+                raise ValueError
+
+            import_name = self.import_map.get(type_name)
             if import_name and import_name not in struct_subtype["meta"]["imports"]:
                 struct_subtype["meta"]["imports"].append(import_name)
 
@@ -516,93 +550,13 @@ class HeaderMapping:
             )
             raise ValueError
 
-        self._undefined_symbols.discard(struct.name)
-        return self._create_type(struct.name, struct_subtype)
+        self._undefined_symbols.discard(target.name)
 
-    def _read_union(self, union: Union) -> str:  # noqa: C901, PLR0912
-        decls = union.decls
-        if not decls:
-            if union.name not in self.type_name_map:
-                self._undefined_symbols.add(union.name)
-                return union.name
+        # Special Case: Some enums are wrapped in a struct.
+        if self._enum_cache.get(target.name):
+            return target.name
 
-            return self.type_name_map[union.name]
-
-        if not isinstance(decls, list):
-            self._print_err(
-                "Failed to read union, unknown type within the declarations.",
-            )
-            raise TypeError
-
-        union_subtype = {
-            "doc": f"Represents a union {union.name} defined within pmdsky.",
-            "meta": {
-                "id": normalize_name(union.name),
-                "endian": "le",
-                "bit-endian": "le",
-                "imports": [],
-            },
-            "seq": [],
-        }
-
-        # We need to be able to skip a range of decls.
-        for declaration in decls:
-            if not isinstance(declaration, Decl):
-                self._print_err(
-                    "Failed to read declaration, the type is not known.",
-                )
-                raise TypeError
-
-            if declaration.bitsize and not isinstance(declaration.bitsize, Constant):
-                self._print_err(
-                    "Failed to read bitsize, the type was not a Constant.",
-                )
-                raise TypeError
-
-            bitsize = None
-            if declaration.bitsize:
-                bitsize = self._process_constant(declaration.bitsize)
-
-            if bitsize:
-                entry = self._process_bitsized_decl(declaration, bitsize)
-                union_subtype["seq"].append(entry)
-                continue
-
-            entry = {
-                "id": normalize_name(declaration.name),
-            }
-
-            declaration_type = declaration.type
-
-            if isinstance(declaration_type, TypeDecl):
-                type_name = self._read_type_decl(declaration_type)
-            elif isinstance(declaration_type, ArrayDecl):
-                type_name = self._read_array(declaration_type, f"{union.name}_{declaration.name}")
-            elif isinstance(declaration_type, Enum):
-                type_name = self._read_enum(declaration_type, bitsize)
-            elif isinstance(declaration_type, PtrDecl):
-                type_name = "pointer"
-            else:
-                self._print_err(
-                    "Failed to read unknown type declaration on union.",
-                )
-                raise TypeError
-
-            import_name = self.import_map[type_name]
-            if import_name and import_name not in union_subtype["meta"]["imports"]:
-                union_subtype["meta"]["imports"].append(import_name)
-
-            entry["type"] = type_name
-            union_subtype["seq"].append(entry)
-
-        if len(union_subtype["seq"]) != len(decls):
-            self._print_err(
-                "The size of the union subtype does not match the C union declarations.",
-            )
-            raise ValueError
-
-        self._undefined_symbols.discard(union.name)
-        return self._create_type(union.name, union_subtype)
+        return self._create_type(target.name, struct_subtype)
 
     def _read_headers(self) -> None:  # noqa: C901, PLR0912 Breaking up this function doesn't make sense.
         # Add the predefined c types to the type map.
@@ -637,9 +591,11 @@ class HeaderMapping:
         )
 
         for entry in ast:
-            print(entry)
+            # Uncomment for debugging.
+            # print(entry) # noqa: ERA001
             if isinstance(entry, Typedef):
-                self._read_typedef(entry)
+                type_name = self._read_typedef(entry)
+                self.type_name_map[entry.name] = type_name
             elif isinstance(entry, Decl):
                 if entry.bitsize is not None:
                     self._print_err(
@@ -657,12 +613,10 @@ class HeaderMapping:
                     type_name = self._read_enum(entry.type)
                 elif isinstance(entry.type, PtrDecl):
                     type_name = self._process_pointer()
-                elif isinstance(entry.type, Struct):
-                    type_name = self._read_struct(entry.type)
+                elif isinstance(entry.type, Struct | Union):
+                    type_name = self._read_struct_or_union(entry.type)
                 elif isinstance(entry.type, TypeDecl):
                     type_name = self._read_type_decl(entry.type)
-                elif isinstance(entry.type, Union):
-                    type_name = self._read_union(entry.type)
                 else:
                     self._print_err(
                         f"Unknown declaration type '{type(entry.type)}'",

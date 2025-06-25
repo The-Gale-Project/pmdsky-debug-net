@@ -1,3 +1,17 @@
+[project]
+name = "pmdsky.kaitai"
+version = "1.0.0"
+description = "Generates Kaitai Struct file from pmdsky-debug symbols and headers."
+
+[build-system]
+requires = [
+    "setuptools >= 80.9.0",
+    "pycparser == 2.22",
+    "ruamel.yaml==0.18.14",
+    "ruamel.yaml.clib==0.2.12",
+]
+build-backend = "setuptools.build_meta"
+
 [tool.ruff]
 line-length = 120
 

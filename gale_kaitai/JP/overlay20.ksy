@@ -1,0 +1,10 @@
+doc: Controls the Recycle Shop.
+meta:
+  id: overlay20
+  tags: JP
+  endian: le
+  imports:
+  - data/overlay20_data
+instances:
+  data:
+    type: overlay20_data

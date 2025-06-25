@@ -16,14 +16,6 @@
             120 // Recommended line length for *.py files.
         ],
     },
-    "cSpell.words": [
-        "bitflags",
-        "kecleon",
-        "mappa",
-        "ppmdu",
-        "tileset",
-        "Yamls"
-    ],
     "cSpell.enabled": false,
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.autoImportCompletions": true

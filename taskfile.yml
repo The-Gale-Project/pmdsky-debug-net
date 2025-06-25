@@ -1,12 +1,18 @@
 version: "3"
 
+method: none # Don't check if the files already exist.
+
 tasks:
-  all:
+  # Note: the gen-xx-cs tasks are prone to failing completely randomly.
+  # As such, I recommended running each one individually instead of using this composite task.
+  build:
+    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: gen-ksy
       - task: gen-eu-cs
       - task: gen-na-cs
       - task: gen-jp-cs
+      - echo "Build complete."
 
   clean:
     dir: "{{.USER_WORKING_DIR}}"
