@@ -1,0 +1,53 @@
+version: "3"
+
+method: none # Don't check if the files already exist.
+
+tasks:
+  # Note: the gen-xx-cs tasks are prone to failing completely randomly.
+  # As such, I recommended running each one individually instead of using this composite task.
+  build:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - task: gen-ksy
+      - task: gen-eu-cs
+      - task: gen-na-cs
+      - task: gen-jp-cs
+      - echo "Build complete."
+
+  clean:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - for: ["EU", "JP", "NA"]
+        cmd: rm -rf {{.USER_WORKING_DIR}}/gale_kaitai/{{.ITEM}}
+      - for: ["EU", "JP", "NA"]
+        cmd: rm -rf {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/{{.ITEM}}
+
+  gen-ksy:
+    dir: "{{.USER_WORKING_DIR}}/generator"
+    cmds:
+      - python gen_kaitai.py
+
+  gen-eu-cs:
+    dir: "{{.USER_WORKING_DIR}}"
+    sources:
+      - "{{.USER_WORKING_DIR}}/gale_kaitai/EU/*.ksy"
+    cmds:
+      - cmd: mkdir -p {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/EU
+      - for: sources
+        cmd: kaitai-struct-compiler -t csharp --outdir {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/EU --dotnet-namespace Gale.EOS.Kaitai.EU {{.ITEM}}
+
+  gen-jp-cs:
+    dir: "{{.USER_WORKING_DIR}}"
+    sources:
+      - "{{.USER_WORKING_DIR}}/gale_kaitai/JP/*.ksy"
+    cmds:
+      - for: sources
+        cmd: kaitai-struct-compiler -t csharp --outdir {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/JP --dotnet-namespace Gale.EOS.Kaitai.JP {{.ITEM}}
+
+  gen-na-cs:
+    dir: "{{.USER_WORKING_DIR}}"
+    sources:
+      - "{{.USER_WORKING_DIR}}/gale_kaitai/NA/*.ksy"
+    cmds:
+      - for: sources
+        cmd: kaitai-struct-compiler -t csharp --outdir {{.USER_WORKING_DIR}}/Gale.EOS.Kaitai/NA --dotnet-namespace Gale.EOS.Kaitai.NA {{.ITEM}}

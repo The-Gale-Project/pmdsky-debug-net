@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
+
+    <!-- Nuget Properties -->
+    <PackageId>Gale.EOS.Kaitai</PackageId>
+    <Version>2.0.1</Version>
+    <Authors>DeltaJordan</Authors>
+    <Title>C# Kaitai Struct Mapping of PMD: EOS</Title>
+    <Description>C# Binary Mapping of Pokémon Mystery Dungeon: Explorers of Sky using Kaitai Struct.</Description>
+    <Copyright>Copyright © Jordan Marine 2025</Copyright>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/The-Gale-Project/pmdsky-debug-net</PackageProjectUrl>
+    <PackageTags>pmd;pmdsky-debug;pmdsky-debug-net</PackageTags>
+    <RepositoryUrl>https://github.com/The-Gale-Project/pmdsky-debug-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>main</RepositoryBranch>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KaitaiStruct.Runtime.CSharp" Version="0.10.0" />
+  </ItemGroup>
+
+</Project>

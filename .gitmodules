@@ -1,3 +1,3 @@
-[submodule "Gale.EOS.Debug/_pmdsky-debug"]
-	path = Gale.EOS.Debug/_pmdsky-debug
+[submodule "gale_kaitai/_pmdsky-debug"]
+	path = generator/_pmdsky-debug
 	url = https://github.com/UsernameFodder/pmdsky-debug.git

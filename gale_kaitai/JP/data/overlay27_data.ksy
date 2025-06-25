@@ -1,0 +1,40 @@
+meta:
+  id: overlay27_data
+  endian: le
+  imports:
+  - ../types/discard_items_menu_items_confirm_array
+  - ../types/discard_items_submenu_items_1_array
+  - ../types/discard_items_submenu_items_2_array
+  - ../types/discard_items_main_menu_items_array
+  - ../types/window_params
+  - ../types/window_params
+  - ../types/window_params
+instances:
+  discard_items_menu_items_confirm:
+    pos: 0x284c
+    type: discard_items_menu_items_confirm_array
+    doc: This symbol is missing documentation.
+  discard_items_submenu_items_1:
+    pos: 0x2864
+    type: discard_items_submenu_items_1_array
+    doc: This symbol is missing documentation.
+  discard_items_submenu_items_2:
+    pos: 0x2884
+    type: discard_items_submenu_items_2_array
+    doc: This symbol is missing documentation.
+  discard_items_main_menu_items:
+    pos: 0x28a4
+    type: discard_items_main_menu_items_array
+    doc: This symbol is missing documentation.
+  discard_window_params_5:
+    pos: 0x293c
+    type: window_params
+    doc: "Note: unverified, ported from Irdkwia's notes"
+  discard_window_params_6:
+    pos: 0x294c
+    type: window_params
+    doc: "Note: unverified, ported from Irdkwia's notes"
+  discard_window_params_7:
+    pos: 0x295c
+    type: window_params
+    doc: "Note: unverified, ported from Irdkwia's notes"
