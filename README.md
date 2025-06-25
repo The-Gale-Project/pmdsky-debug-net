@@ -15,9 +15,9 @@ dotnet add package Gale.EOS.Kaitai
   - Simplifies running all the needed commands to generate the source files.
 - [Python 3.13](https://www.python.org)
 - The following pip packages:
-  - pycparser
-  - ruamel.yaml
-  - ruamel.yaml.clib
+  - `pycparser`
+  - `ruamel.yaml`
+  - `ruamel.yaml.clib`
 - [kaitai-struct-compiler](https://github.com/kaitai-io/kaitai_struct_compiler)
 
 ### Building
